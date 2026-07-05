@@ -30,10 +30,10 @@ app.use((req, res, next) => {
   }
 });
 
-app.use("/", (req,res) => res.status(200).send({message:"Ok"}))
 
 app.use("/auth", authRouter)
 
+app.use("/", (req,res) => res.status(200).send({message:"Ok"}))
 app.use((err, req, res, next) => {
   console.log("******Global error midleware******")
   if (res.headersSent) {

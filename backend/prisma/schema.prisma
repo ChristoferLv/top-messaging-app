@@ -7,9 +7,52 @@ datasource db {
   provider = "postgresql"
 }
 
-model users {
-  id         Int      @id @default(autoincrement())
-  username   String   @unique @db.VarChar(30) 
-  password   String
-  created_at DateTime @default(now()) @db.Timestamptz(6)
+model Users {
+  id              Int        @id @default(autoincrement())
+  username        String     @unique @db.VarChar(30)
+  password        String
+  created_at      DateTime   @default(now()) @db.Timestamptz(6)
+  chatAsSender    Chats[]    @relation("ChatAsSender")
+  chatAsRecipient Chats[]    @relation("ChatAsRecipient")
+  messages        Messages[]
 }
+
+model Chats {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  senderId    Int
+  sender      Users      @relation(name: "ChatAsSender", fields: [senderId], references: [id])
+  recipientId Int
+  recipient   Users      @relation(name: "ChatAsRecipient", fields: [recipientId], references: [id])
+  messages    Messages[]
+
+  @@unique([senderId, recipientId])
+}
+
+model Messages {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.VarChar(1000)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  senderId   Int
+  sender     Users    @relation(fields: [senderId], references: [id])
+  chatsId    Int
+  chat       Chats    @relation(fields: [chatsId], references: [id])
+}
+
+// model Order {
+//   id               Int     @id @default(autoincrement())
+//   tradeId          Int
+//   trade            Trade   @relation(name: "Order_Trade", fields: [tradeId], references: [id])
+//   entryOrderTrades Trade[] @relation("Trade_EntryOrder")
+//   exitOrderTrades  Trade[] @relation("Trade_ExitOrder")
+// }
+
+// model Trade {
+//   id           Int     @id @default(autoincrement())
+//   entryOrderId Int
+//   entryOrder   Order   @relation(name: "Trade_EntryOrder", fields: [entryOrderId], references: [id])
+//   exitOrderId  Int
+//   exitOrder    Order   @relation(name: "Trade_ExitOrder", fields: [exitOrderId], references: [id])
+//   order        Order[] @relation("Order_Trade")
+// }
