@@ -27,7 +27,7 @@ async function main() {
 
   await prisma.messages.deleteMany();
 
-  const defaultMessage1 = await prisma.messages.create({ data: { chatsId: defaultChat.id, senderId: defaultUsers[1].id, content: "The first message." } });
+  const defaultMessage1 = await prisma.messages.create({ data: { chatsId: defaultChat.id, senderId: defaultUsers[0].id, content: "The first message." } });
   const defaultMessage2 = await prisma.messages.create({ data: { chatsId: defaultChat.id, senderId: defaultUsers[1].id, content: "The second message" } });
 
   console.log('Default users created:', defaultUsers);

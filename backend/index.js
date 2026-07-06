@@ -4,6 +4,7 @@ import { passport } from "./authUtils.js";
 import authRouter from "./routes/authRoutes.js";
 import { prisma } from "./lib/prisma.js";
 import cors from 'cors'
+import chatRoutes from './routes/chatRoutes.js';
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.use((req, res, next) => {
 });
 
 
+app.use("/chats", chatRoutes)
 app.use("/auth", authRouter)
 
 app.use("/", (req,res) => res.status(200).send({message:"Ok"}))
