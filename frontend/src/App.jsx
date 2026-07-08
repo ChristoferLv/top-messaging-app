@@ -13,9 +13,7 @@ function App() {
 
   return (
     <>
-      <p>Olá {user.username}</p>
       <Outlet />
-
     </>
   )
 }

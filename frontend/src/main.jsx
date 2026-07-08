@@ -4,6 +4,7 @@ import App from './App.jsx'
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import LoginPage from './LoginPage.jsx';
 import { AuthProvider } from './AuthProvider.jsx'
+import MainPage from './MainPage.jsx';
 
 
 const router = createBrowserRouter([
@@ -12,7 +13,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-
+      { path: "/", element: <MainPage /> },
       { path: "*", element: <Navigate to="/" replace /> }
     ]
   },

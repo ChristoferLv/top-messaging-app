@@ -5,6 +5,7 @@ import authRouter from "./routes/authRoutes.js";
 import { prisma } from "./lib/prisma.js";
 import cors from 'cors'
 import chatRoutes from './routes/chatRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 
 const app = express();
@@ -32,8 +33,9 @@ app.use((req, res, next) => {
 });
 
 
-app.use("/chats", chatRoutes)
-app.use("/auth", authRouter)
+app.use("/chats", chatRoutes);
+app.use("/users", userRoutes);
+app.use("/auth", authRouter);
 
 app.use("/", (req,res) => res.status(200).send({message:"Ok"}))
 app.use((err, req, res, next) => {

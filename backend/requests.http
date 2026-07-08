@@ -1,4 +1,4 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4MzM2NDQyMCwiZXhwIjoxNzgzNDUwODIwfQ.NxG8xBx4JZQrod1JHPlSgg6GGsqpYhdoaMlIR9igUgc
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4MzUzOTAyNywiZXhwIjoxNzgzNjI1NDI3fQ.V3VMej1B92MoMcAr3IkquCw-RjFPO7lqUgLkMJqnELE
 
 ###
 
@@ -28,12 +28,17 @@ Authorization: {{token}}
 
 ###
 
+GET http://localhost:3000/users
+Authorization: {{token}}
+
+###
+
 GET http://localhost:3000/chats
 Authorization: {{token}}
 
 ###
 
-GET http://localhost:3000/chats/chatWith/7
+GET http://localhost:3000/chats/chatWith/6
 Authorization: {{token}}
 
 ###
@@ -63,7 +68,7 @@ Authorization: {{token}}
 
 ###
 
-GET http://localhost:3000/chats/4/messages
+GET http://localhost:3000/chats/28/messages
 content-type: application/json
 Authorization: {{token}}
 

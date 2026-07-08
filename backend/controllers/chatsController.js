@@ -31,8 +31,8 @@ async function checkChatExistsWith(req, res) {
             }
         });
         if (!chat)
-            res.status(404).send({ success: false, message: "No chats with this user." });
-        res.status(200).send({ success: true, data: chat });
+            res.status(200).send({ success: true, isChat: false });
+        res.status(200).send({ success: true, isChat: true, data: chat });
     } catch (e) {
         console.log(e);
         res.status(500).send({ success: false });
@@ -106,7 +106,7 @@ async function sendFirstMessage(req, res) {
                     }
                 }
             );
-            return {chat:newChat, message:firstMessage};
+            return { chat: newChat, message: firstMessage };
         });
 
 
@@ -114,7 +114,7 @@ async function sendFirstMessage(req, res) {
 
         // const firstMessageResult = await prisma.$transaction([newChat, firstMessage]);
         console.log(firstMessageResult)
-       
+
         res.status(201).send({ success: true, data: firstMessageResult });
     } catch (e) {
         console.log(e);
@@ -167,7 +167,7 @@ async function getMessageOfChat(req, res) {
                 chat: true,
                 sender: { omit: { password: true, created_at: true } }
             },
-            orderBy: { created_at: 'desc' }
+            orderBy: { created_at: 'asc' }
         });
 
         if (messages.length == 0)
