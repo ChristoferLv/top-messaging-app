@@ -1,11 +1,14 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, sendFirstMessage, sendMessage } from "./api/requests";
 import { AuthContext } from "./AuthContext";
+import MyContacts from "./components/MyContacts";
 
 function MainPage() {
     const [usersList, setUsersList] = useState([]);
     const { user, isLoading } = useContext(AuthContext);
     const containerRef = useRef(null);
+
+    const [viewChats, setViewChats] = useState(true);
 
 
     useEffect(() => {
@@ -50,9 +53,10 @@ function MainPage() {
     }, [chat])
 
 
-    async function handleClickUser(userId) {
+    async function handleSelectUser(userId) {
         setChat(null);
         setMessages(null);
+        setViewChats(true);
         const chatExistsData = await checkChatWith(userId);
         console.log(chatExistsData)
         if (chatExistsData.isChat) {
@@ -82,20 +86,32 @@ function MainPage() {
             setMessages(newMessages.data);
         }
     }
+
+    function handleToggleSidePane() {
+        setViewChats(c => !c);
+    }
+
     console.log(messages)
 
     return (
 
         <>
             <div className="main-page">
-                <div className="side-pane">
-                    <p>Olá {user.username}</p>
-                    {usersList.length > 0 ? usersList.map((user) => {
-                        return <div key={user.id} className="user-item" onClick={(e) => handleClickUser(user.id)}>
-                            <p>{user.id} - {user.username}</p>
+                {viewChats ? (
+
+                    <div className="side-pane">
+                        <p>Olá {user.username}</p>
+                        <div onClick={(e) => handleToggleSidePane()} className="new-chat">
+                            New chat +
                         </div>
-                    }) : <p>No users</p>}
-                </div>
+                        {usersList.length > 0 ? usersList.map((user) => {
+                            return <div key={user.id} className="user-item" onClick={(e) => handleSelectUser(user.id)}>
+                                <p>{user.id} - {user.username}</p>
+                            </div>
+                        }) : <p>No users</p>}
+                    </div>) : (
+                    <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} />
+                )}
                 <div className="chat-pane">
                     {chatingUser ? (
                         <>

@@ -11,10 +11,22 @@ model Users {
   id              Int        @id @default(autoincrement())
   username        String     @unique @db.VarChar(30)
   password        String
+  fiendCode       String     @unique
   created_at      DateTime   @default(now()) @db.Timestamptz(6)
   chatAsSender    Chats[]    @relation("ChatAsSender")
   chatAsRecipient Chats[]    @relation("ChatAsRecipient")
   messages        Messages[]
+  contactOf       Contacts[] @relation("contacOf")
+  contactsOwner   Contacts[] @relation("contactOwner")
+}
+
+model Contacts {
+  contactOwner   Users @relation("contactOwner", fields: [contactOwnerId], references: [id])
+  contactOwnerId Int
+  contact        Users @relation("contacOf", fields: [contactId], references: [id])
+  contactId      Int
+
+  @@id([contactOwnerId, contactId])
 }
 
 model Chats {

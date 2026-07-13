@@ -1,4 +1,4 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4MzUzOTAyNywiZXhwIjoxNzgzNjI1NDI3fQ.V3VMej1B92MoMcAr3IkquCw-RjFPO7lqUgLkMJqnELE
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4Mzk3OTU3MSwiZXhwIjoxNzg0MDY1OTcxfQ.rnn_rcAXQSwlnnh6L7lmgv0VtbmqH2ss1e37bSOKBxE
 
 ###
 
@@ -29,6 +29,26 @@ Authorization: {{token}}
 ###
 
 GET http://localhost:3000/users
+Authorization: {{token}}
+
+###
+
+GET http://localhost:3000/users/find/user1
+Authorization: {{token}}
+
+###
+
+POST http://localhost:3000/contacts
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+    "username":"user2"
+}
+
+###
+
+GET http://localhost:3000/contacts
 Authorization: {{token}}
 
 ###

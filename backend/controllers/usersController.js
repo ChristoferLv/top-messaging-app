@@ -14,7 +14,27 @@ async function getAllUsers(req, res) {
     }
 }
 
+async function findUserByUsername(req, res) {
+    const { username } = req.params;
+    try {
+        const user = await prisma.users.findUnique({
+            where: { username: username },
+            omit: {
+                created_at: true, password: true
+            }
+        });
+
+        if(!user)
+            return res.status(200).send({ success: false, data: null })
+
+        res.status(200).send({ success: true, data: user });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 
 export {
-    getAllUsers
+    getAllUsers,
+    findUserByUsername
 }

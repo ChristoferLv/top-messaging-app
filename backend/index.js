@@ -6,6 +6,7 @@ import { prisma } from "./lib/prisma.js";
 import cors from 'cors'
 import chatRoutes from './routes/chatRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import friendRouter from './routes/friendRoutes.js';
 
 
 const app = express();
@@ -32,8 +33,8 @@ app.use((req, res, next) => {
   }
 });
 
-
 app.use("/chats", chatRoutes);
+app.use("/contacts", friendRouter);
 app.use("/users", userRoutes);
 app.use("/auth", authRouter);
 

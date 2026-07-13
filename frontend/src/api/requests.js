@@ -155,6 +155,71 @@ async function fetchMessagesOfChat(chatId) {
     }
 }
 
+async function findUserWithUsername(username) {
+    console.log("Search for", username)
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch("http://localhost:3000/users/find/" + username, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const user = await request.json();
+            return user;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function getMyContacts() {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch("http://localhost:3000/contacts", {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const contacts = await request.json();
+            return contacts;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function addContact(contactUsername) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch("http://localhost:3000/contacts", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify({ username: contactUsername })
+        });
+        if (request.ok) {
+            const contact = await request.json();
+            return contact;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 
 export {
     login,
@@ -164,5 +229,8 @@ export {
     checkChatWith,
     sendFirstMessage,
     sendMessage,
-    fetchMessagesOfChat
+    fetchMessagesOfChat,
+    addContact,
+    getMyContacts,
+    findUserWithUsername
 }
