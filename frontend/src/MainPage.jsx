@@ -1,28 +1,42 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, sendFirstMessage, sendMessage } from "./api/requests";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, fetchMyChats, sendFirstMessage, sendMessage } from "./api/requests";
 import { AuthContext } from "./AuthContext";
 import MyContacts from "./components/MyContacts";
 
 function MainPage() {
     const [usersList, setUsersList] = useState([]);
+    const [chatsList, setChatsList] = useState([]);
     const { user, isLoading } = useContext(AuthContext);
     const containerRef = useRef(null);
 
     const [viewChats, setViewChats] = useState(true);
+    const fetchChats = useCallback(async () => {
+        try {
+            const chats = await fetchMyChats();
+            console.log(chats)
+            setChatsList(chats.data);
+        } catch (e) {
+            console.log(e);
+        }
+    }, []);
 
+
+    // useEffect(() => {
+    //     async function getAllUsers() {
+    //         try {
+    //             const users = await fetchAllUsers();
+    //             console.log(users)
+    //             setUsersList(users.data);
+    //         } catch (e) {
+    //             console.log(e);
+    //         }
+
+    //     }
+    //     getAllUsers();
+    // }, []);
 
     useEffect(() => {
-        async function getAllUsers() {
-            try {
-                const users = await fetchAllUsers();
-                console.log(users)
-                setUsersList(users.data);
-            } catch (e) {
-                console.log(e);
-            }
-
-        }
-        getAllUsers();
+        fetchChats();
     }, []);
 
     const [chatingUser, setChatingUser] = useState(null);
@@ -76,6 +90,7 @@ function MainPage() {
             console.log(result)
             if (result) {
                 setChat(result.data.chat);
+                fetchChats();
             }
         } else {
             const result = await sendMessage(chat.id, e.target.children[0].value);
@@ -104,9 +119,9 @@ function MainPage() {
                         <div onClick={(e) => handleToggleSidePane()} className="new-chat">
                             New chat +
                         </div>
-                        {usersList.length > 0 ? usersList.map((user) => {
-                            return <div key={user.id} className="user-item" onClick={(e) => handleSelectUser(user.id)}>
-                                <p>{user.id} - {user.username}</p>
+                        {chatsList.length > 0 ? chatsList.map((chat) => {
+                            return <div key={chat.userId} className="user-item" onClick={(e) => handleSelectUser(chat.userId)}>
+                                <p>{chat.userId} - {chat.username}</p>
                             </div>
                         }) : <p>No users</p>}
                     </div>) : (

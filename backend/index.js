@@ -33,12 +33,29 @@ app.use((req, res, next) => {
   }
 });
 
+app.use((req, res, next) => {
+    // Save a reference to the original res.send function
+    const originalSend = res.send;
+
+    // Overwrite the function to intercept the payload
+    res.send = function (body) {
+        console.log('--- Outgoing Response Data ---');
+        console.log(body); 
+        console.log('------------------------------');
+
+        // Call the original send function to complete the request
+        return originalSend.apply(res, arguments);
+    };
+
+    next();
+});
+
 app.use("/chats", chatRoutes);
 app.use("/contacts", friendRouter);
 app.use("/users", userRoutes);
 app.use("/auth", authRouter);
 
-app.use("/", (req,res) => res.status(200).send({message:"Ok"}))
+app.use("/", (req, res) => res.status(200).send({ message: "Ok" }))
 app.use((err, req, res, next) => {
   console.log("******Global error midleware******")
   if (res.headersSent) {

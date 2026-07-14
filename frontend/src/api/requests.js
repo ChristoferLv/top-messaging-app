@@ -67,6 +67,28 @@ async function fetchAllUsers() {
     }
 }
 
+async function fetchMyChats() {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch('http://localhost:3000/chats/mine', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.status == 200) {
+            const chatsData = await request.json();
+            console.log(chatsData)
+            return chatsData;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 async function checkChatWith(userId) {
     try {
         const token = localStorage.getItem("token");
@@ -226,6 +248,7 @@ export {
     logOut,
     getMe,
     fetchAllUsers,
+    fetchMyChats,
     checkChatWith,
     sendFirstMessage,
     sendMessage,
