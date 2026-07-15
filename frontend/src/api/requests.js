@@ -80,7 +80,6 @@ async function fetchMyChats() {
         });
         if (request.status == 200) {
             const chatsData = await request.json();
-            console.log(chatsData)
             return chatsData;
         }
     } catch (e) {

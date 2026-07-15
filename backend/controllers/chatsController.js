@@ -57,7 +57,22 @@ async function listMyChats(req, res) {
         ORDER BY updated_at DESC
         `
 
-        res.status(200).send({ success: true, data: chats });
+        const lastMessageOfChatPromises = chats.map((chat) => {
+            return prisma.messages.findFirst(
+                {
+                    where: { chatsId: chat.chatId },
+                    orderBy: { created_at: 'desc' }
+                }
+            )
+        });
+
+        const lastMessageOfChat = await Promise.all(lastMessageOfChatPromises);
+
+        const chatsData = chats.map((chat, idx) => {
+            return { ...chat, lastMessage: lastMessageOfChat[idx] };
+        })
+
+        res.status(200).send({ success: true, data:  chatsData  });
     } catch (e) {
         console.log(e);
         res.status(500).send({ success: false });
@@ -113,7 +128,7 @@ async function sendFirstMessage(req, res) {
 
 
         // const firstMessageResult = await prisma.$transaction([newChat, firstMessage]);
-        console.log(firstMessageResult)
+        // console.log(firstMessageResult)
 
         res.status(201).send({ success: true, data: firstMessageResult });
     } catch (e) {
@@ -129,25 +144,38 @@ async function sendFirstMessage(req, res) {
 async function sendMessage(req, res) {
     const chatId = parseInt(req.params.chatId);
     try {
-        const chat = await prisma.chats.findUnique({
-            where: { id: chatId }
+        const sendMessageResult = await prisma.$transaction(async (tx) => {
+            const chat = await prisma.chats.findUnique({
+                where: { id: chatId }
+            });
+
+            if (!chat)
+                return res.status(300).send({ success: false, message: "Chat not found" });
+
+            const updateChatResult = await prisma.chats.update(
+                {
+                    where: { id: chat.id },
+                    data: { updated_at: new Date() }
+                },
+            );
+
+            const message = req.body.message;
+            const userId = req.user.id;
+
+            const result = await prisma.messages.create({
+                data: {
+                    content: message,
+                    chatsId: chat.id,
+                    senderId: userId,
+                }
+            });
+            return result;
         });
-        if (!chat)
-            return res.status(300).send({ success: false, message: "Chat not found" });
 
-        console.log(req.body)
-        const message = req.body.message;
-        const userId = req.user.id;
 
-        const result = await prisma.messages.create({
-            data: {
-                content: message,
-                chatsId: chat.id,
-                senderId: userId,
 
-            }
-        });
-        res.status(201).send({ success: true, data: result });
+
+        res.status(201).send({ success: true, data: sendMessageResult });
     } catch (e) {
         console.log(e);
         res.status(500).send({ success: false });
