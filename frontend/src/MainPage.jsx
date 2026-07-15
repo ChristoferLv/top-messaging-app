@@ -10,6 +10,9 @@ function MainPage() {
     const { user, isLoading } = useContext(AuthContext);
     const containerRef = useRef(null);
     const sortedChatsList = chatsList.sort((a, b) => b.updated_at - a.updated_at);
+    const [chatingUser, setChatingUser] = useState(null);
+    const [chat, setChat] = useState(null);
+    const [messages, setMessages] = useState([]);
 
     const [viewChats, setViewChats] = useState(true);
     const fetchChats = useCallback(async () => {
@@ -20,6 +23,21 @@ function MainPage() {
             console.log(e);
         }
     }, []);
+
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === 'Escape') {
+                setChat(null);
+                setChatingUser(null);
+            }
+        };
+        window.addEventListener('keydown', handleEsc);
+
+        return () => {
+            window.removeEventListener('keydown', handleEsc);
+        };
+    }, []);
+
 
 
     // useEffect(() => {
@@ -40,9 +58,6 @@ function MainPage() {
         fetchChats();
     }, []);
 
-    const [chatingUser, setChatingUser] = useState(null);
-    const [chat, setChat] = useState(null);
-    const [messages, setMessages] = useState([]);
 
 
     useEffect(() => {
@@ -160,7 +175,7 @@ function MainPage() {
                             </div>
                         </>
                     ) : (
-                        <p>Chating with no one</p>
+                        <NoChatHolder />
                     )
 
                     }
@@ -173,3 +188,17 @@ function MainPage() {
 
 
 export default MainPage;
+
+
+
+function NoChatHolder() {
+    return (
+        <div className="holder">
+            <div className="holder-content">
+                <div className="hold-img"></div>
+                <p className="welcome">Welcome 🙂</p>
+                <p className="hold-text">Send and receive messages in the best place ✉️</p>
+            </div>
+        </div>
+    )
+}
