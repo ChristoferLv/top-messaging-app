@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, fetchMyChats, sendFirstMessage, sendMessage } from "./api/requests";
+import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, fetchMyChats, logOut, sendFirstMessage, sendMessage } from "./api/requests";
 import { AuthContext } from "./AuthContext";
 import MyContacts from "./components/MyContacts";
 
@@ -131,6 +131,10 @@ function MainPage() {
         setViewChats(c => !c);
     }
 
+    function handleLogout(){
+        logOut();
+    }
+
     console.log("chats list", chatsList)
     console.log("sorted chats list", sortedChatsList)
 
@@ -139,8 +143,11 @@ function MainPage() {
         <>
             <div className="main-page">
                 {viewChats ? (
-
                     <div className="side-pane">
+                        <div className="logout-btn" onClick={handleLogout}>
+                            <div className="logout-icon"></div>
+                            <p>Log out</p>
+                        </div>
                         <p>Olá {user.username}</p>
                         <div onClick={(e) => handleToggleSidePane()} className="new-chat">
                             New chat +
