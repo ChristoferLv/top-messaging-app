@@ -145,12 +145,13 @@ function MainPage() {
                 {viewChats ? (
                     <div className="side-pane">
                         <div className="logout-btn" onClick={handleLogout}>
-                            <div className="logout-icon"></div>
+                            <div className="icon logout-icon"></div>
                             <p>Log out</p>
                         </div>
                         <p>Olá {user.username}</p>
-                        <div onClick={(e) => handleToggleSidePane()} className="new-chat">
-                            New chat +
+                        <div onClick={(e) => handleToggleSidePane()} className="new-chat-btn">
+                            <p>New Chat</p>
+                            <div className="icon new-chat-icon"></div>
                         </div>
                         {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
                             return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem.userId)}>

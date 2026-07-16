@@ -56,13 +56,16 @@ function MyContacts({ closeContactsList, selectUser }) {
     return (
         <>
             <div className="side-pane">
-                <div className="back-button" onClick={(e) => closeContactsList()}>&lt;- Back</div>
-                <div className="back-button" onClick={(e) => handleAddContact()}>&lt;- New Contact</div>
+                <div className="back-btn" onClick={(e) => closeContactsList()}>
+                    <div className="icon back-icon"></div>
+                    <p>Back</p>
+                </div>
                 <div className="new-contact">
+                    <p>Add new contact</p>
                     <form onSubmit={hadleSearchContact}>
                         <label htmlFor="">Contact Username</label>
                         <input id="username" type="text" placeholder="Username" onChange={hadleUsername} value={searchUsername} />
-                        <button type="submit">Search</button>
+                        <button type="submit">Search User</button>
                     </form>
                     <div className="found-contact">
                         {contactSearched && foundContact && <>
