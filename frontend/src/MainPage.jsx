@@ -1,8 +1,9 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, fetchMyChats, logOut, sendFirstMessage, sendMessage } from "./api/requests";
+import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, fetchMyChats, fetchPicture, logOut, sendFirstMessage, sendMessage } from "./api/requests";
 import { AuthContext } from "./AuthContext";
 import MyContacts from "./components/MyContacts";
 import ProfilePage from "./components/Profile";
+import UserPicture from "./components/UserPicture";
 
 function MainPage() {
     const [usersList, setUsersList] = useState([]);
@@ -164,9 +165,12 @@ function MainPage() {
                         </div>
                         {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
                             return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem.userId)}>
-                                <p>{chatItem.userId} - {chatItem.username}</p>
-                                <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
-                                <p>{new Date(chatItem.updated_at).toLocaleString()}</p>
+                                <UserPicture userId={chatItem.userId}/>
+                                <div className="user-item-data">
+                                    <p>{chatItem.userId} - {chatItem.username}</p>
+                                    <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
+                                    <p>{new Date(chatItem.updated_at).toLocaleString()}</p>
+                                </div>
                             </div>
                         }) : <p>No users</p>}
                     </div>) : (
@@ -177,6 +181,7 @@ function MainPage() {
                 ) : (
                     chatingUser ? (
                         <div className="chat-pane">
+                            <UserPicture userId={chatingUser} />
                             <div className="chat-page"><p>Chat with {chatingUser}</p> - {chat ? <p>chat: {chat.id}</p> : <p>First message</p>}</div>
                             <div className="chat-body" ref={containerRef}>
                                 {/* <p>Messages</p> */}
@@ -220,3 +225,4 @@ function NoChatHolder() {
         </div>
     )
 }
+

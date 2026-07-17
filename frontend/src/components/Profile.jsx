@@ -6,8 +6,8 @@ function ProfilePage() {
     const { user, isLoading } = useContext(AuthContext);
     const [imageFile, setImageFile] = useState(null);
     const fileInputRef = useRef(null);
-    const [pictureB64, setPicture] = useState(":");
-    const [mime, picture] = pictureB64.split(":")
+    const [pictureB64, setPicture] = useState(null);
+    const [mime, picture] = pictureB64 ? pictureB64.split(":") : [null, null];
 
     useEffect(() => {
         async function getPicture() {
@@ -52,7 +52,7 @@ function ProfilePage() {
             <div className="profile">
                 <div className="profile-pic" onClick={handleClickImage}
                 >
-                    <img src={user.picture == "" ? "../public/avatar.png" :
+                    <img src={!pictureB64 ? "../public/avatar.png" :
                         `data:${mime};base64,${picture}`} alt="" />
                 </div>
                 <p className="profile-username">{user.username}</p>

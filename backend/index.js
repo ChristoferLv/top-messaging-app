@@ -41,7 +41,6 @@ app.use((req, res, next) => {
     // Overwrite the function to intercept the payload
     res.send = function (body) {
         console.log('--- Outgoing Response Data ---');
-        console.log(body); 
         console.log('------------------------------');
 
         // Call the original send function to complete the request
