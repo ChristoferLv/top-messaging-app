@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, fetchMyChats, logOut, sendFirstMessage, sendMessage } from "./api/requests";
 import { AuthContext } from "./AuthContext";
 import MyContacts from "./components/MyContacts";
+import ProfilePage from "./components/Profile";
 
 function MainPage() {
     const [usersList, setUsersList] = useState([]);
@@ -15,6 +16,7 @@ function MainPage() {
     const [messages, setMessages] = useState([]);
 
     const [viewChats, setViewChats] = useState(true);
+    const [showProfile, setshowProfile] = useState(false);
     const fetchChats = useCallback(async () => {
         try {
             const chats = await fetchMyChats();
@@ -86,6 +88,7 @@ function MainPage() {
     async function handleSelectUser(userId) {
         setChat(null);
         setMessages(null);
+        setshowProfile(false);
         setViewChats(true);
         const chatExistsData = await checkChatWith(userId);
         if (chatExistsData.isChat) {
@@ -131,7 +134,11 @@ function MainPage() {
         setViewChats(c => !c);
     }
 
-    function handleLogout(){
+    function handleToggleProfile() {
+        setshowProfile(c => !c);
+    }
+
+    function handleLogout() {
         logOut();
     }
 
@@ -148,7 +155,9 @@ function MainPage() {
                             <div className="icon logout-icon"></div>
                             <p>Log out</p>
                         </div>
-                        <p>Olá {user.username}</p>
+                        <div className="profile-btn" onClick={handleToggleProfile}>
+                            <p>Olá {user.username}</p>
+                        </div>
                         <div onClick={(e) => handleToggleSidePane()} className="new-chat-btn">
                             <p>New Chat</p>
                             <div className="icon new-chat-icon"></div>
@@ -163,11 +172,14 @@ function MainPage() {
                     </div>) : (
                     <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} />
                 )}
-                <div className="chat-pane">
-                    {chatingUser ? (
-                        <>
+                {showProfile ? (
+                    <ProfilePage />
+                ) : (
+                    chatingUser ? (
+                        <div className="chat-pane">
                             <div className="chat-page"><p>Chat with {chatingUser}</p> - {chat ? <p>chat: {chat.id}</p> : <p>First message</p>}</div>
-                            <div className="chat-body" ref={containerRef}><p>Messages</p>
+                            <div className="chat-body" ref={containerRef}>
+                                {/* <p>Messages</p> */}
                                 {messages && messages.map((message) => {
                                     return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
                                         <p>{message.id} - {message.content}</p>
@@ -181,14 +193,12 @@ function MainPage() {
                                     <button type="submit">Send</button>
                                 </form>
                             </div>
-                        </>
+                        </div>
                     ) : (
                         <NoChatHolder />
                     )
-
-                    }
-                </div>
-            </div>
+                )}
+            </div >
         </>
     )
 

@@ -241,6 +241,49 @@ async function addContact(contactUsername) {
     }
 }
 
+async function sendPicture(data) {
+    try {
+        const formData = new FormData();
+        formData.append("picture", data.picture);
+        const token = localStorage.getItem("token");
+        const result = await fetch("http://localhost:3000/users/picture/", {
+
+            method: 'Post',
+            body: formData,
+
+            headers: {
+                Authorization: token,
+            },
+        })
+        const resultData = await result.json();
+        return resultData;
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function fetchPicture(userId) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch("http://localhost:3000/users/picture/" + userId, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const picture = await request.json();
+            return picture;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 
 export {
     login,
@@ -254,5 +297,7 @@ export {
     fetchMessagesOfChat,
     addContact,
     getMyContacts,
-    findUserWithUsername
+    findUserWithUsername,
+    sendPicture,
+    fetchPicture
 }

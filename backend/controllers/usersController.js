@@ -24,7 +24,7 @@ async function findUserByUsername(req, res) {
             }
         });
 
-        if(!user)
+        if (!user)
             return res.status(200).send({ success: false, data: null })
 
         res.status(200).send({ success: true, data: user });
@@ -33,8 +33,31 @@ async function findUserByUsername(req, res) {
     }
 }
 
+async function getPicture(req, res) {
+    const userId = parseInt(req.params.userId);
+    const result = await prisma.users.findUnique(
+        { where: { id: userId }, select: { picture: true } }
+    );
+    res.status(200).send({ success: true, data: result.picture });
+}
+
+async function uploadPicture(req, res) {
+    const userId = req.user.id;
+    const content = new Buffer.from(req.file.buffer).toString('base64');
+    const mime = req.file.mimetype;
+    const result = await prisma.users.update(
+        {
+            data: { picture: `${mime}:${content}` },
+            where: { id: userId }
+        }
+    );
+    return res.status(201).send({ success: true, data: result.picture });
+}
+
 
 export {
     getAllUsers,
-    findUserByUsername
+    findUserByUsername,
+    getPicture,
+    uploadPicture
 }

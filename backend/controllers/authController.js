@@ -25,11 +25,11 @@ const validateNewUser = [
 
 async function getMe(req, res) {
     try {
-        const result = await prisma.users.findUnique({ where: { id: req.user.id }, include: { contactOf: true, contactsOwner: true } });
+        const result = await prisma.users.findUnique({ where: { id: req.user.id }, omit: { password: true, picture: true } });
 
         console.log(result)
         if (req.user)
-            return res.status(200).json({ success: true, data: req.user });
+            return res.status(200).json({ success: true, data: result });
         return res.status(400).json({ success: false, data: undefined });
     } catch (error) {
         return next(error);
