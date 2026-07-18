@@ -22,6 +22,11 @@ async function checkChatExistsWith(req, res) {
     const userId = req.user.id;
     const receiverId = parseInt(req.params.userId);
     try {
+        const user = await prisma.users.findUnique({
+            where: { id: receiverId },
+            omit: { picture: true, password: true }
+        });
+
         const chat = await prisma.chats.findFirst({
             where: {
                 OR: [
@@ -31,8 +36,8 @@ async function checkChatExistsWith(req, res) {
             }
         });
         if (!chat)
-            res.status(200).send({ success: true, isChat: false });
-        res.status(200).send({ success: true, isChat: true, data: chat });
+            return res.status(200).send({ success: true, isChat: false, data: { user: user } });
+        return res.status(200).send({ success: true, isChat: true, data: { user: user, chat: chat } });
     } catch (e) {
         console.log(e);
         res.status(500).send({ success: false });
@@ -72,7 +77,7 @@ async function listMyChats(req, res) {
             return { ...chat, lastMessage: lastMessageOfChat[idx] };
         })
 
-        res.status(200).send({ success: true, data:  chatsData  });
+        res.status(200).send({ success: true, data: chatsData });
     } catch (e) {
         console.log(e);
         res.status(500).send({ success: false });
@@ -192,8 +197,9 @@ async function getMessageOfChat(req, res) {
         const messages = await prisma.messages.findMany({
             where: { chatsId: chatId },
             include: {
-                chat: true,
-                sender: { omit: { password: true, created_at: true } }
+                // chat: {include:{sender:}},
+                // sender: { omit: { password: true, created_at: true, picture:true } }
+                sender: { select: { id: true } }
             },
             orderBy: { created_at: 'asc' }
         });

@@ -157,6 +157,30 @@ label {
     padding: 0 10px;
 }
 
+.main-header{
+    display: flex;
+    flex-direction: column;
+    padding-left: 5px;
+}
+
+.app-title{
+    font-family: sans-serif;
+    font-weight: bold;
+    padding: 5px;
+    font-size: x-large;
+    margin: 0;
+    margin-top: 10px;
+}
+
+.profile-btn {
+    display: flex;
+    margin-top: 10px;
+    align-items: center;
+    gap: 0 15px;
+    font-family: sans-serif;
+    cursor: pointer;
+}
+
 .new-chat-btn {
     display: flex;
     flex-direction: row-reverse;
@@ -167,16 +191,13 @@ label {
     font-family: sans-serif;
     margin-left: auto;
     margin-right: 10px;
+    margin-bottom: -15px;
     max-width: fit-content;
 }
 
 .new-chat-icon {
     mask-image: url("../public/new-chat-icon.png");
     background-color: white;
-}
-
-.profile-btn {
-    cursor: pointer;
 }
 
 .user-item {
@@ -235,33 +256,85 @@ label {
 }
 
 .chat-pane {
-    --rad: 20px;
+    position: relative;
+    --rad: 15px;
     --rad-sm: 3px;
     display: flex;
     flex-direction: column;
 }
 
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 0 10px;
+    background-color: #161717;
+    color: white;
+    padding: 10px;
 
-.chat-body {
+    font-family: sans-serif;
+    font-size: large;
+
+    p {
+        margin: 0;
+    }
+}
+
+.chat-body{
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    background-image: url("../public/background.png");
+    background-position: center;
+    background-size: cover;
+}
+
+.messages-list {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     flex-basis: 0;
-    background-color: #4CAF50;
-    max-height: none;
     overflow-y: scroll;
     padding: 20px;
-    /* justify-content: flex-end; */
+    margin-bottom: 80px;
 }
 
-.chat-body>*:first-child {
+.messages-list>*:first-child {
     margin-top: auto;
 }
 
+.chat-controls {
+    width: 100%;
+}
 
 .chat-controls form {
+    box-sizing: border-box;
     display: flex;
+    position: absolute;
+    bottom: 10px;
+    margin: 10px;
+    width: calc(100% - 45px);
 
+
+    input {
+        border: none;
+        background-color: #242626;
+        border-radius: 9999px;
+        padding: 10px 0;
+        padding-left: 25px;
+        flex-grow: 1;
+        flex-shrink: 1;
+        color: white;
+        font-family: sans-serif;
+        font-size: medium;
+    }
+
+    input:focus{
+        outline: none;
+    }
+
+    input::placeholder{
+        color: #d3d3d3;
+    }
 }
 
 .own-message {
@@ -411,6 +484,7 @@ label {
 }
 
 .user-mini-picture {
+    cursor: inherit;
     margin: 0;
     width: 40px;
     height: 40px;

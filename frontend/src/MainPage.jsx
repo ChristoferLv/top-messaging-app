@@ -92,12 +92,12 @@ function MainPage() {
         setshowProfile(false);
         setViewChats(true);
         const chatExistsData = await checkChatWith(userId);
+        setChatingUser(chatExistsData.data.user);
         if (chatExistsData.isChat) {
-            setChat(chatExistsData.data);
+            setChat(chatExistsData.data.chat);
         } else {
             setChat(null);
         }
-        setChatingUser(userId)
     }
 
     async function handleSendMessage(e) {
@@ -156,16 +156,20 @@ function MainPage() {
                             <div className="icon logout-icon"></div>
                             <p>Log out</p>
                         </div>
-                        <div className="profile-btn" onClick={handleToggleProfile}>
-                            <p>Olá {user.username}</p>
-                        </div>
-                        <div onClick={(e) => handleToggleSidePane()} className="new-chat-btn">
-                            <p>New Chat</p>
-                            <div className="icon new-chat-icon"></div>
+                        <div className="main-header">
+                            <p className="app-title">WhatsUp</p>
+                            <div className="profile-btn" onClick={handleToggleProfile}>
+                                <UserPicture userId={user.id} />
+                                <p>Olá {user.username}</p>
+                            </div>
+                            <div onClick={(e) => handleToggleSidePane()} className="new-chat-btn">
+                                <p>New Chat</p>
+                                <div className="icon new-chat-icon"></div>
+                            </div>
                         </div>
                         {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
                             return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem.userId)}>
-                                <UserPicture userId={chatItem.userId}/>
+                                <UserPicture userId={chatItem.userId} />
                                 <div className="user-item-data">
                                     <p>{chatItem.userId} - {chatItem.username}</p>
                                     <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
@@ -181,21 +185,25 @@ function MainPage() {
                 ) : (
                     chatingUser ? (
                         <div className="chat-pane">
-                            <UserPicture userId={chatingUser} />
-                            <div className="chat-page"><p>Chat with {chatingUser}</p> - {chat ? <p>chat: {chat.id}</p> : <p>First message</p>}</div>
-                            <div className="chat-body" ref={containerRef}>
-                                {/* <p>Messages</p> */}
-                                {messages && messages.map((message) => {
-                                    return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                        <p>{message.id} - {message.content}</p>
-                                        <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
-                                    </div>
-                                })}
+                            <div className="chat-header">
+                                <UserPicture userId={chatingUser.id} />
+                                <p>{chatingUser.username}</p>
+                            </div>
+                            <div className="chat-body">
+                                <div className="messages-list" ref={containerRef}>
+                                    {/* <p>Messages</p> */}
+                                    {messages && messages.map((message) => {
+                                        return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                                            <p>{message.id} - {message.content}</p>
+                                            <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
+                                        </div>
+                                    })}
+                                </div>
                             </div>
                             <div className="chat-controls">
                                 <form onSubmit={handleSendMessage} action="">
-                                    <input type="text" value={typingMessage} onChange={(e) => handleTypingMessage(e)} />
-                                    <button type="submit">Send</button>
+                                    <input type="text" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
+                                    {/* <button type="submit">Send</button> */}
                                 </form>
                             </div>
                         </div>
