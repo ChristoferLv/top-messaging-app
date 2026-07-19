@@ -1,4 +1,4 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4Mzk3OTU3MSwiZXhwIjoxNzg0MDY1OTcxfQ.rnn_rcAXQSwlnnh6L7lmgv0VtbmqH2ss1e37bSOKBxE
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4NDMwMTM2MCwiZXhwIjoxNzg0Mzg3NzYwfQ.LqnUuS17Il_p9CAtwELhDBmT1MHlbbyWwwqQypHNc0E
 
 ###
 
@@ -68,7 +68,7 @@ Authorization: {{token}}
 
 ###
 
-POST http://localhost:3000/chats/4/messages
+POST http://localhost:3000/chats/29/messages
 content-type: application/json
 Authorization: {{token}}
 
@@ -88,7 +88,7 @@ Authorization: {{token}}
 
 ###
 
-GET http://localhost:3000/chats/28/messages
+GET http://localhost:3000/chats/29/messages
 content-type: application/json
 Authorization: {{token}}
 

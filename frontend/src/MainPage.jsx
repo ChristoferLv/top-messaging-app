@@ -4,17 +4,22 @@ import { AuthContext } from "./AuthContext";
 import MyContacts from "./components/MyContacts";
 import ProfilePage from "./components/Profile";
 import UserPicture from "./components/UserPicture";
+import { io } from 'socket.io-client';
+
+// let socket = null;
 
 function MainPage() {
+    const [socket, setSocket] = useState(null);
     const [usersList, setUsersList] = useState([]);
     const [chatsList, setChatsList] = useState([]);
     const [typingMessage, setTypingMessage] = useState("");
     const { user, isLoading } = useContext(AuthContext);
     const containerRef = useRef(null);
-    const sortedChatsList = chatsList.sort((a, b) => b.updated_at - a.updated_at);
     const [chatingUser, setChatingUser] = useState(null);
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
+    
+    const sortedChatsList = chatsList.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
     const [viewChats, setViewChats] = useState(true);
     const [showProfile, setshowProfile] = useState(false);
@@ -26,6 +31,19 @@ function MainPage() {
             console.log(e);
         }
     }, []);
+
+    const getMessagesOfChat = useCallback(async () => {
+        try {
+            const messages = await fetchMessagesOfChat(chat.id);
+            if (messages) {
+                setMessages(messages.data);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }, [chat]);
+
+
 
     useEffect(() => {
         const handleEsc = (event) => {
@@ -40,6 +58,56 @@ function MainPage() {
             window.removeEventListener('keydown', handleEsc);
         };
     }, []);
+
+    useEffect(() => {
+        function onConnect() {
+            console.log("connected")
+        }
+
+        function onDisconnect() {
+            console.log("disconnected")
+        }
+
+        function onFooEvent(value) {
+            console.log("foor", value)
+            const chatId = value.split(":")[1];
+            console.log(chat.id, chatId)
+            if (chat && chat.id == chatId) {
+                console.log("get messages with socket")
+                getMessagesOfChat();
+            } else {
+                console.log("refetching chats")
+                fetchChats();
+            }
+        }
+
+        if (socket) {
+            socket.on('connect', onConnect);
+            socket.on('disconnect', onDisconnect);
+            socket.on('olha a mensagem', onFooEvent);
+        }
+        return () => {
+            console.log("cleaning up")
+            if (socket) {
+                socket.off('connect', onConnect);
+                socket.off('disconnect', onDisconnect);
+                socket.off('olha a mensagem', onFooEvent);
+            }
+        };
+    }, [socket, chat]);
+
+    useEffect(() => {
+        if (user && !isLoading) {
+            const storagedToken = localStorage.getItem('token');
+            const socket = io("http://localhost:3000", {
+                auth: {
+                    token: storagedToken
+                }
+            });
+            socket.connect();
+            setSocket(socket)
+        }
+    }, [user, isLoading]);
 
 
 
@@ -70,19 +138,10 @@ function MainPage() {
     }, [messages]); // Fires every time the messages array updates
 
     useEffect(() => {
-        async function getMessagesOfChat() {
-            try {
-                const messages = await fetchMessagesOfChat(chat.id);
-                if (messages) {
-                    setMessages(messages.data);
-                }
-            } catch (e) {
-                console.log(e);
-            }
-
-        }
-        if (chat != null)
+        if (chat != null) {
+            // console.log("get the messages")
             getMessagesOfChat();
+        }
     }, [chat])
 
 
@@ -113,7 +172,7 @@ function MainPage() {
             if (result) {
                 const newChats = chatsList.map((newChat) => {
                     if (newChat.chatId == chat.id) {
-                        return { ...newChat, updated_at: new Date(), lastMessage: result.data }
+                        return { ...newChat, updated_at: new Date().toISOString(), lastMessage: result.data }
                     }
                     return newChat;
                 });
@@ -173,7 +232,7 @@ function MainPage() {
                                 <div className="user-item-data">
                                     <p>{chatItem.userId} - {chatItem.username}</p>
                                     <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
-                                    <p>{new Date(chatItem.updated_at).toLocaleString()}</p>
+                                    <p>{new Date(chatItem.updated_at).toISOString()}</p>
                                 </div>
                             </div>
                         }) : <p>No users</p>}

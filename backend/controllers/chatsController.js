@@ -174,6 +174,12 @@ async function sendMessage(req, res) {
                     senderId: userId,
                 }
             });
+
+            const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
+            console.log("receiver", receiver)
+            if (result) {
+                req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
+            }
             return result;
         });
 

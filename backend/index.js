@@ -7,9 +7,16 @@ import cors from 'cors'
 import chatRoutes from './routes/chatRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import friendRouter from './routes/friendRoutes.js';
+import jwt from 'jsonwebtoken';
+
+
+import http from 'http'
+import { Server } from 'socket.io'
 
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "http://localhost:5173" } });
 app.use(json());
 
 const corsOptions = {
@@ -18,6 +25,11 @@ const corsOptions = {
 
 app.use(urlencoded({ extended: true }));
 app.use(cors(corsOptions));
+
+app.use((req, res, next) => {
+  req.socketIo = io;
+  next();
+})
 
 app.use((req, res, next) => {
   try {
@@ -35,19 +47,19 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    // Save a reference to the original res.send function
-    const originalSend = res.send;
+  // Save a reference to the original res.send function
+  const originalSend = res.send;
 
-    // Overwrite the function to intercept the payload
-    res.send = function (body) {
-        console.log('--- Outgoing Response Data ---');
-        console.log('------------------------------');
+  // Overwrite the function to intercept the payload
+  res.send = function (body) {
+    console.log('--- Outgoing Response Data ---');
+    console.log('------------------------------');
 
-        // Call the original send function to complete the request
-        return originalSend.apply(res, arguments);
-    };
+    // Call the original send function to complete the request
+    return originalSend.apply(res, arguments);
+  };
 
-    next();
+  next();
 });
 
 app.use("/chats", chatRoutes);
@@ -71,7 +83,32 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(3000, (error) => {
+// Socket.IO connection handler
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  console.log("sokcet info", socket.id);
+  console.log("sokcet info", socket.handshake.auth);
+  console.log(socket.handshake)
+  var decoded = jwt.verify(socket.handshake.auth.token.split(" ")[1], process.env.JWT_SECRET);
+  console.log(decoded) // bar
+  socket.user = { userId: decoded.id };
+  socket.join(`user:${decoded.id}`);
+  // Handle new messages
+  socket.on('chat message', (msg) => {
+    console.log('Message received:', msg);
+    console.log("sokcet info", socket.id, socket.user);
+    io.to(`user:${socket.user.userId}`).emit("olha a mensagem", "user:" + socket.user.userId);
+    // Broadcast the message to all connected clients
+    io.emit('chat message', msg);
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
+});
+
+server.listen(3000, (error) => {
   if (error) {
     throw error;
   }
