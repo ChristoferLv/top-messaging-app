@@ -7,6 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum MessageType {
+  TEXT
+  MIDIA
+}
+
 model Users {
   id              Int        @id @default(autoincrement())
   username        String     @unique @db.VarChar(30)
@@ -19,6 +24,7 @@ model Users {
   messages        Messages[]
   contactOf       Contacts[] @relation("contacOf")
   contactsOwner   Contacts[] @relation("contactOwner")
+  midias          Midias[]
 }
 
 model Contacts {
@@ -45,13 +51,24 @@ model Chats {
 }
 
 model Messages {
-  id         Int      @id @default(autoincrement())
-  content    String   @db.VarChar(1000)
-  created_at DateTime @default(now()) @db.Timestamptz(6)
+  id         Int         @id @default(autoincrement())
+  type       MessageType
+  content    String      @db.VarChar(1000)
+  created_at DateTime    @default(now()) @db.Timestamptz(6)
   senderId   Int
-  sender     Users    @relation(fields: [senderId], references: [id])
+  sender     Users       @relation(fields: [senderId], references: [id])
   chatsId    Int
-  chat       Chats    @relation(fields: [chatsId], references: [id])
+  chat       Chats       @relation(fields: [chatsId], references: [id])
+  midias     Midias[]
+}
+
+model Midias {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  ownerId   Int
+  owner     Users    @relation(fields: [ownerId], references: [id])
+  messageId Int      @unique
+  message   Messages @relation(fields: [messageId], references: [id])
 }
 
 // model Order {

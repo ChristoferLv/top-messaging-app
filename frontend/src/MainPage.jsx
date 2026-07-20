@@ -5,6 +5,7 @@ import MyContacts from "./components/MyContacts";
 import ProfilePage from "./components/Profile";
 import UserPicture from "./components/UserPicture";
 import { io } from 'socket.io-client';
+import MidiaMessage from "./components/MidiaMessage";
 
 // let socket = null;
 
@@ -18,7 +19,7 @@ function MainPage() {
     const [chatingUser, setChatingUser] = useState(null);
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
-    
+
     const sortedChatsList = chatsList.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
     const [viewChats, setViewChats] = useState(true);
@@ -161,14 +162,18 @@ function MainPage() {
 
     async function handleSendMessage(e) {
         e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        console.log(data)
+
+        fileInputRef.current.value = "";
         if (!chat) {
-            const result = await sendFirstMessage(chatingUser, typingMessage);
+            const result = await sendFirstMessage(chatingUser, data);
             if (result) {
                 setChat(result.data.chat);
                 fetchChats();
             }
         } else {
-            const result = await sendMessage(chat.id, typingMessage);
+            const result = await sendMessage(chat.id, data);
             if (result) {
                 const newChats = chatsList.map((newChat) => {
                     if (newChat.chatId == chat.id) {
@@ -204,6 +209,25 @@ function MainPage() {
 
     console.log("chats list", chatsList)
     console.log("sorted chats list", sortedChatsList)
+
+    const fileInputRef = useRef(null);
+
+    function handleClickAttach(e) {
+        fileInputRef.current.click();
+    }
+
+    async function handleUploadImage(e) {
+        e.target.parentElement.requestSubmit();
+    }
+
+    async function handlePictureSubmit(e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        // const result = await sendPicture(data);
+        if (result) {
+            setPicture(result.data);
+        }
+    }
 
     return (
 
@@ -252,6 +276,10 @@ function MainPage() {
                                 <div className="messages-list" ref={containerRef}>
                                     {/* <p>Messages</p> */}
                                     {messages && messages.map((message) => {
+                                        if (message.type == "MIDIA")
+                                            return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                                                <MidiaMessage midiaId={message.id} />
+                                            </div>
                                         return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
                                             <p>{message.id} - {message.content}</p>
                                             <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
@@ -261,8 +289,20 @@ function MainPage() {
                             </div>
                             <div className="chat-controls">
                                 <form onSubmit={handleSendMessage} action="">
-                                    <input type="text" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
-                                    {/* <button type="submit">Send</button> */}
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        name="midia"
+                                        style={{ display: "none" }}
+                                        onChange={handleUploadImage}
+                                    />
+                                    <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
+                                    <button className="send-picture"
+                                        type="button"
+                                        onClick={handleClickAttach}
+                                    ><img src="../public/attach-icon.png" alt="" />
+                                    </button>
                                 </form>
                             </div>
                         </div>

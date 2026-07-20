@@ -110,17 +110,19 @@ async function checkChatWith(userId) {
 }
 
 async function sendFirstMessage(chatId, message) {
+    const formData = new FormData();
+    formData.append("midia", data.midia);
+    formData.append("message", data.message)
     console.log("first message")
     try {
         const token = localStorage.getItem("token");
         const request = await fetch(`http://localhost:3000/chats/${chatId}/messages/first`, {
-            method: 'POST',
+            method: 'Post',
+            body: formData,
+
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': token
+                Authorization: token,
             },
-            body: JSON.stringify({ message: message })
         });
         if (request.ok) {
             const chatData = await request.json();
@@ -132,17 +134,19 @@ async function sendFirstMessage(chatId, message) {
     }
 }
 
-async function sendMessage(chatId, message) {
+async function sendMessage(chatId, data) {
+    const formData = new FormData();
+    formData.append("midia", data.midia);
+    formData.append("message", data.message)
     try {
         const token = localStorage.getItem("token");
         const request = await fetch(`http://localhost:3000/chats/${chatId}/messages`, {
-            method: 'POST',
+            method: 'Post',
+            body: formData,
+
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': token
+                Authorization: token,
             },
-            body: JSON.stringify({ message: message })
         });
         if (request.ok) {
             const chatData = await request.json();
@@ -284,6 +288,27 @@ async function fetchPicture(userId) {
     }
 }
 
+async function fetchMessageMidia(midiaId) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch("http://localhost:3000/chats/midia/" + midiaId, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const midia = await request.json();
+            return midia;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 
 export {
     login,
@@ -299,5 +324,6 @@ export {
     getMyContacts,
     findUserWithUsername,
     sendPicture,
-    fetchPicture
+    fetchPicture,
+    fetchMessageMidia
 }

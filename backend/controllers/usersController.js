@@ -42,6 +42,7 @@ async function getPicture(req, res) {
 }
 
 async function uploadPicture(req, res) {
+    console.log(req.body)
     const userId = req.user.id;
     const content = new Buffer.from(req.file.buffer).toString('base64');
     const mime = req.file.mimetype;

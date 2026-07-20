@@ -92,6 +92,9 @@ async function listMyChats(req, res) {
 async function sendFirstMessage(req, res) {
     const userId = req.user.id;
     const receiverId = parseInt(req.params.userId);
+    const midiaMessage = req.file?.size > 0;
+    let fileRef = null;
+    let result = null;
 
     try {
         const chat = await prisma.chats.findFirst({
@@ -117,16 +120,62 @@ async function sendFirstMessage(req, res) {
                 }
             });
 
-            const firstMessage = await tx.messages.create(
-                {
+            if (midiaMessage) {
+                result = await tx.messages.create({
+                    data: {
+                        content: "Midia",
+                        chatsId: chat.id,
+                        senderId: userId,
+                        type: 'MIDIA'
+                    }
+                });
+            } else {
+                result = await tx.messages.create({
                     data: {
                         content: message,
+                        chatsId: chat.id,
                         senderId: userId,
-                        chatsId: newChat.id
+                        type: 'TEXT'
                     }
-                }
-            );
-            return { chat: newChat, message: firstMessage };
+                });
+            }
+
+            if (midiaMessage) {
+                const fileData = new Buffer.from(req.file.buffer).toString('base64');
+                const mime = req.file.mimetype;
+
+                fileRef = await tx.midias.create(
+                    {
+                        data: {
+                            content: `${mime}:${fileData}`,
+                            ownerId: userId,
+                            messageId: result.id,
+                        }
+                    }
+                )
+            }
+
+            const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
+            console.log("receiver", receiver)
+            if (result) {
+                req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
+            }
+            if (midiaMessage) {
+                const { reducedFileRef, content } = fileRef;
+                return { ...result, midia: reducedFileRef };
+            }
+            return result;
+
+            // const firstMessage = await tx.messages.create(
+            //     {
+            //         data: {
+            //             content: message,
+            //             senderId: userId,
+            //             chatsId: newChat.id
+            //         }
+            //     }
+            // );
+            // return { chat: newChat, message: firstMessage };
         });
 
 
@@ -148,16 +197,21 @@ async function sendFirstMessage(req, res) {
  */
 async function sendMessage(req, res) {
     const chatId = parseInt(req.params.chatId);
+    console.log(req.file)
+    console.log(req.body)
+    const midiaMessage = req.file?.size > 0;
     try {
+        let fileRef = null;
+        let result = null;
         const sendMessageResult = await prisma.$transaction(async (tx) => {
-            const chat = await prisma.chats.findUnique({
+            const chat = await tx.chats.findUnique({
                 where: { id: chatId }
             });
 
             if (!chat)
                 return res.status(300).send({ success: false, message: "Chat not found" });
 
-            const updateChatResult = await prisma.chats.update(
+            const updateChatResult = await tx.chats.update(
                 {
                     where: { id: chat.id },
                     data: { updated_at: new Date() }
@@ -167,18 +221,50 @@ async function sendMessage(req, res) {
             const message = req.body.message;
             const userId = req.user.id;
 
-            const result = await prisma.messages.create({
-                data: {
-                    content: message,
-                    chatsId: chat.id,
-                    senderId: userId,
-                }
-            });
+            if (midiaMessage) {
+                result = await tx.messages.create({
+                    data: {
+                        content: "Midia",
+                        chatsId: chat.id,
+                        senderId: userId,
+                        type: 'MIDIA'
+                    }
+                });
+            } else {
+                result = await tx.messages.create({
+                    data: {
+                        content: message,
+                        chatsId: chat.id,
+                        senderId: userId,
+                        type: 'TEXT'
+                    }
+                });
+            }
+
+            if (midiaMessage) {
+                const fileData = new Buffer.from(req.file.buffer).toString('base64');
+                const mime = req.file.mimetype;
+
+                fileRef = await tx.midias.create(
+                    {
+                        data: {
+                            content: `${mime}:${fileData}`,
+                            ownerId: userId,
+                            messageId: result.id,
+                        }
+                    }
+                )
+            }
+
 
             const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
             console.log("receiver", receiver)
             if (result) {
                 req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
+            }
+            if (midiaMessage) {
+                const { reducedFileRef, content } = fileRef;
+                return { ...result, midia: reducedFileRef };
             }
             return result;
         });
@@ -223,6 +309,29 @@ async function getMessageOfChat(req, res) {
     }
 }
 
+/**
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ */
+async function getMessageMidia(req, res) {
+    const midiaId = parseInt(req.params.midiaId);
+    try {
+        const content = await prisma.midias.findUnique({
+            where: { messageId: midiaId },
+        });
+
+        if (!content)
+            return res.status(404).send({
+                success: false,
+            });
+
+        res.status(200).send({ success: true, data: content });
+    } catch (e) {
+        console.log(e);
+        res.status(500).send({ success: false });
+    }
+}
+
 
 export {
     listAllChats,
@@ -230,5 +339,6 @@ export {
     sendMessage,
     getMessageOfChat,
     checkChatExistsWith,
-    sendFirstMessage
+    sendFirstMessage,
+    getMessageMidia
 }

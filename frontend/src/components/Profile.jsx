@@ -4,7 +4,6 @@ import { fetchPicture, sendPicture } from "../api/requests";
 
 function ProfilePage() {
     const { user, isLoading } = useContext(AuthContext);
-    const [imageFile, setImageFile] = useState(null);
     const fileInputRef = useRef(null);
     const [pictureB64, setPicture] = useState(null);
     const [mime, picture] = pictureB64 ? pictureB64.split(":") : [null, null];
@@ -30,6 +29,7 @@ function ProfilePage() {
     async function handlePictureSubmit(e) {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
+        console.log(data)
         const result = await sendPicture(data);
         if (result) {
             setPicture(result.data);
