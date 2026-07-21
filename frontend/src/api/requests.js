@@ -202,6 +202,50 @@ async function findUserWithUsername(username) {
     }
 }
 
+async function findUserById(userId) {
+    console.log("Search for", userId)
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch("http://localhost:3000/users/" + userId, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const user = await request.json();
+            return user;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function updateProfile(data) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch("http://localhost:3000/users/", {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body:JSON.stringify(data)
+        });
+        if (request.ok) {
+            const user = await request.json();
+            return user;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 async function getMyContacts() {
     try {
         const token = localStorage.getItem("token");
@@ -323,6 +367,8 @@ export {
     addContact,
     getMyContacts,
     findUserWithUsername,
+    findUserById,
+    updateProfile,
     sendPicture,
     fetchPicture,
     fetchMessageMidia

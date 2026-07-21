@@ -274,6 +274,8 @@ label {
     font-family: sans-serif;
     font-size: large;
 
+    cursor: pointer;
+
     p {
         margin: 0;
     }
@@ -528,10 +530,38 @@ dialog {
 .profile-page {
     background-color: #161717;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
     height: 100%;
+}
+
+.profile-controls {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    width: calc(100% - 40px);
+    margin: 20px;
+    align-self: flex-start;
+    
+    button{
+        background-color: #4a4a4d;
+        border: none;
+        color: white;
+        font-size: large;
+        border-radius: 10px;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    button:hover{
+        background-color: #353537;
+    }
+}
+
+.save-edit-button{
+    margin-left: auto;
 }
 
 .profile {
@@ -587,13 +617,32 @@ dialog {
 }
 
 .profile-username {
+    margin:0;
     margin-top: 20px;
     font-family: sans-serif;
     font-size: x-large;
 }
 
+.profile-note{
+    font-size: medium;
+    font-family: sans-serif;
+    color:#e9e9e9;
+}
+
+.profile-note-input{
+    margin: 20px;
+    margin-bottom: -5px;
+    padding: 10px;
+    background-color: #242626;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    outline: none;
+    width: 40%;
+}
+
 .profile-date {
-    margin-top: 0;
+    margin-top: 10px;
     text-align: center;
 }
 
@@ -646,4 +695,8 @@ dialog {
     padding-top: 10px;
     text-align: center;
     color: #d3d3d3;
+}
+
+.loading{
+    color: white;
 }

@@ -1,22 +1,35 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../AuthContext";
-import { fetchPicture, sendPicture } from "../api/requests";
+import { fetchPicture, findUserById, sendPicture, updateProfile } from "../api/requests";
 
-function ProfilePage() {
+function ProfilePage({ userId, close}) {
     const { user, isLoading } = useContext(AuthContext);
+    const [profile, setProfile] = useState(null);
     const fileInputRef = useRef(null);
     const [pictureB64, setPicture] = useState(null);
     const [mime, picture] = pictureB64 ? pictureB64.split(":") : [null, null];
+    const [isEditing, setIsEditing] = useState(false);
+
+    const [editedProfile, setEditedProfile] = useState(null);
 
     useEffect(() => {
         async function getPicture() {
-            if (user) {
-                const picture = await fetchPicture(user.id);
+            if (profile) {
+                const picture = await fetchPicture(profile.id);
                 setPicture(picture.data);
             }
         }
         getPicture();
-    }, [user])
+    }, [profile])
+
+    useEffect(() => {
+        async function getProfile() {
+            const profile = await findUserById(userId);
+            console.log(profile)
+            setProfile(profile.data);
+        }
+        getProfile();
+    }, [userId])
 
     function handleClickImage(e) {
         fileInputRef.current.click();
@@ -36,6 +49,26 @@ function ProfilePage() {
         }
     }
 
+    async function handleEdit() {
+        setIsEditing(c => !c);
+        setEditedProfile(profile);
+    }
+
+    async function handleChange(e) {
+        const whoChanged = event.target;
+        const newValues = { ...editedProfile, [whoChanged.name]: whoChanged.value }
+        setEditedProfile(newValues);
+    }
+
+    async function handleSave(e) {
+        const result = await updateProfile(editedProfile);
+        if (result) {
+            setProfile(result.data);
+            setIsEditing(false);
+        }
+    }
+
+    if (!profile) return <div className="profile-page"><p className="loading">Loading...</p></div>
 
     return (<>
         <div className="profile-page">
@@ -49,14 +82,32 @@ function ProfilePage() {
                     onChange={handleUploadImage}
                 />
             </form>
+
             <div className="profile">
-                <div className="profile-pic" onClick={handleClickImage}
+                <div className="profile-controls">
+                    <button onClick={close}>&larr; Back</button>
+                    {isEditing && <button className="save-edit-button" onClick={handleSave}>Save</button>}
+                    {userId == user.id ? <button onClick={handleEdit}>{isEditing ? "Cancel Edit" : "Edit"}</button> : null}
+                </div>
+                <div
+                    style={isEditing ? {} : { pointerEvents: "none" }}
+                    className="profile-pic" onClick={handleClickImage}
                 >
                     <img src={!pictureB64 ? "../public/avatar.png" :
                         `data:${mime};base64,${picture}`} alt="" />
                 </div>
-                <p className="profile-username">{user.username}</p>
-                <p className="profile-date">Acount created at: <br />{new Date(user.created_at).toLocaleDateString()}</p>
+                <p className="profile-username">{profile.username}</p>
+                {isEditing ? (
+                    <input className="profile-note-input" type="text" name="note" value={editedProfile.note} onChange={(e) => handleChange(e)} />
+                )
+                    : (
+                        <>
+                            <p className="profile-note">Note: {profile.note}</p>
+                        </>
+                    )
+
+                }
+                <p className="profile-date">Acount created at: <br />{new Date(profile.created_at).toLocaleDateString()}</p>
             </div>
         </div>
     </>);

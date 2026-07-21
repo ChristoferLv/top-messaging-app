@@ -24,7 +24,7 @@ function MainPage() {
     const sortedChatsList = chatsList.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
     const [viewChats, setViewChats] = useState(true);
-    const [showProfile, setshowProfile] = useState(false);
+    const [showProfile, setshowProfile] = useState(-1);
     const fetchChats = useCallback(async () => {
         try {
             const chats = await fetchMyChats();
@@ -52,6 +52,7 @@ function MainPage() {
             if (event.key === 'Escape') {
                 setChat(null);
                 setChatingUser(null);
+                setshowProfile(-1);
             }
         };
         window.addEventListener('keydown', handleEsc);
@@ -150,7 +151,7 @@ function MainPage() {
     async function handleSelectUser(userId) {
         setChat(null);
         setMessages(null);
-        setshowProfile(false);
+        setshowProfile(-1);
         setViewChats(true);
         const chatExistsData = await checkChatWith(userId);
         setChatingUser(chatExistsData.data.user);
@@ -210,6 +211,7 @@ function MainPage() {
 
     console.log("chats list", chatsList)
     console.log("sorted chats list", sortedChatsList)
+    console.log(chatingUser)
 
     const fileInputRef = useRef(null);
 
@@ -230,6 +232,62 @@ function MainPage() {
         }
     }
 
+    async function seeUserProfile(userId) {
+        setshowProfile(userId);
+    }
+
+     async function closeUserProfile(userId) {
+        setshowProfile(-1);
+    }
+
+
+    let mainPane = <NoChatHolder />;
+
+    console.log(showProfile)
+    if (showProfile != -1) {
+        mainPane = <ProfilePage userId={showProfile} close={closeUserProfile}/>
+    } else if (chatingUser) {
+        mainPane = <div className="chat-pane">
+            <div className="chat-header" onClick={() => seeUserProfile(chatingUser.id)}>
+                <UserPicture userId={chatingUser.id} />
+                <p>{chatingUser.username}</p>
+            </div>
+            <div className="chat-body">
+                <div className="messages-list" ref={containerRef}>
+                    {/* <p>Messages</p> */}
+                    {messages && messages.map((message) => {
+                        if (message.type == "MIDIA")
+                            return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                                <MidiaMessage midiaId={message.id} />
+                            </div>
+                        return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                            <p>{message.id} - {message.content}</p>
+                            <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
+                        </div>
+                    })}
+                </div>
+            </div>
+            <div className="chat-controls">
+                <form onSubmit={handleSendMessage} action="">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        name="midia"
+                        style={{ display: "none" }}
+                        onChange={handleUploadImage}
+                    />
+                    <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
+                    <button className="send-picture"
+                        type="button"
+                        onClick={handleClickAttach}
+                    ><img src="../public/attach-icon.png" alt="" />
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+
     return (
 
         <>
@@ -242,7 +300,7 @@ function MainPage() {
                         </div>
                         <div className="main-header">
                             <p className="app-title">WhatsUp</p>
-                            <div className="profile-btn" onClick={handleToggleProfile}>
+                            <div className="profile-btn" onClick={() => seeUserProfile(user.id)}>
                                 <UserPicture userId={user.id} />
                                 <p>Olá {user.username}</p>
                             </div>
@@ -276,53 +334,7 @@ function MainPage() {
                     </div>) : (
                     <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} />
                 )}
-                {showProfile ? (
-                    <ProfilePage />
-                ) : (
-                    chatingUser ? (
-                        <div className="chat-pane">
-                            <div className="chat-header">
-                                <UserPicture userId={chatingUser.id} />
-                                <p>{chatingUser.username}</p>
-                            </div>
-                            <div className="chat-body">
-                                <div className="messages-list" ref={containerRef}>
-                                    {/* <p>Messages</p> */}
-                                    {messages && messages.map((message) => {
-                                        if (message.type == "MIDIA")
-                                            return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                                <MidiaMessage midiaId={message.id} />
-                                            </div>
-                                        return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                            <p>{message.id} - {message.content}</p>
-                                            <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
-                                        </div>
-                                    })}
-                                </div>
-                            </div>
-                            <div className="chat-controls">
-                                <form onSubmit={handleSendMessage} action="">
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        name="midia"
-                                        style={{ display: "none" }}
-                                        onChange={handleUploadImage}
-                                    />
-                                    <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
-                                    <button className="send-picture"
-                                        type="button"
-                                        onClick={handleClickAttach}
-                                    ><img src="../public/attach-icon.png" alt="" />
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    ) : (
-                        <NoChatHolder />
-                    )
-                )}
+                {mainPane}
             </div >
         </>
     )

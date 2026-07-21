@@ -20,7 +20,7 @@ async function findUserByUsername(req, res) {
         const user = await prisma.users.findUnique({
             where: { username: username },
             omit: {
-                created_at: true, password: true
+                password: true, picture: true
             }
         });
 
@@ -28,6 +28,49 @@ async function findUserByUsername(req, res) {
             return res.status(200).send({ success: false, data: null })
 
         res.status(200).send({ success: true, data: user });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+async function getUserById(req, res) {
+    const userId = parseInt(req.params.userId);
+    try {
+        const user = await prisma.users.findUnique({
+            where: { id: userId },
+            omit: {
+                password: true, picture: true
+            }
+        });
+
+        if (!user)
+            return res.status(200).send({ success: false, data: null })
+
+        res.status(200).send({ success: true, data: user });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+async function updateUserProfile(req, res) {
+    const userId = parseInt(req.user.id);
+    const note = req.body.note;
+    try {
+        const user = await prisma.users.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            return res.status(400).send({ success: false });
+        }
+
+        const result = await prisma.users.update({
+            where: { id: userId },
+            data: { note: note },
+            omit: { password: true, picture: true }
+        })
+
+        return res.status(200).send({ success: true, data: result });
     } catch (e) {
         console.log(e);
     }
@@ -59,6 +102,8 @@ async function uploadPicture(req, res) {
 export {
     getAllUsers,
     findUserByUsername,
+    getUserById,
+    updateUserProfile,
     getPicture,
     uploadPicture
 }
