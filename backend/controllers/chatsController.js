@@ -52,16 +52,15 @@ async function listMyChats(req, res) {
     const userId = req.user.id;
     try {
         const chats = await prisma.$queryRaw`
-        SELECT "Chats".id as "chatId", updated_at, sender.id as "userId", sender.username
+        SELECT "Chats".id as "chatId", updated_at, sender.id as "userId", sender.username, 'NORMAL' as "chatType"
         FROM "Chats"
         INNER JOIN "Users" as sender ON "Chats"."senderId" = ${userId} AND sender.id = "Chats"."recipientId"
         UNION
-        SELECT "Chats".id as "chatId", updated_at, receiver.id as "userId", receiver.username
+        SELECT "Chats".id as "chatId", updated_at, receiver.id as "userId", receiver.username, 'NORMAL' as "chatType"
         FROM "Chats"
         INNER JOIN "Users" as receiver ON "Chats"."recipientId" = ${userId} AND receiver.id = "Chats"."senderId"
-        ORDER BY updated_at DESC
+        
         `
-
         const lastMessageOfChatPromises = chats.map((chat) => {
             return prisma.messages.findFirst(
                 {
@@ -77,7 +76,33 @@ async function listMyChats(req, res) {
             return { ...chat, lastMessage: lastMessageOfChat[idx] };
         })
 
-        res.status(200).send({ success: true, data: chatsData });
+        const groups = await prisma.$queryRaw`
+        SELECT "GroupChats".id as "groupId", updated_at, null as "userId", "GroupChats"."name" as "username", 'GROUP' as "chatType"
+        FROM "GroupChats"
+        INNER JOIN "UsersGroups" ON "GroupChats".id = "groupChatId"
+        WHERE "UsersGroups"."userId" = ${userId}
+
+        ORDER BY updated_at DESC
+        `
+
+        const lastMessageOfGroupsPromises = groups.map((group) => {
+            return prisma.groupMessages.findFirst(
+                {
+                    where: { groupChatId: group.id },
+                    orderBy: { created_at: 'desc' },
+                }
+            )
+        });
+
+        const lastMessageOfGroups = await Promise.all(lastMessageOfGroupsPromises);
+
+        const groupsData = groups.map((group, idx) => {
+            return { ...group, lastMessage: lastMessageOfGroups[idx] };
+        })
+
+        console.log(chatsData, groupsData)
+
+        res.status(200).send({ success: true, data: [...chatsData, ...groupsData] });
     } catch (e) {
         console.log(e);
         res.status(500).send({ success: false });

@@ -6,6 +6,7 @@ import ProfilePage from "./components/Profile";
 import UserPicture from "./components/UserPicture";
 import { io } from 'socket.io-client';
 import MidiaMessage from "./components/MidiaMessage";
+import { ChatType } from "./defaults";
 
 // let socket = null;
 
@@ -251,6 +252,18 @@ function MainPage() {
                             </div>
                         </div>
                         {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
+                            if (chatItem.chatType == ChatType.GROUP)
+                                return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem.userId)}>
+                                    <UserPicture userId={chatItem.groupId} />
+                                    <div className="user-item-data">
+                                        <p>{chatItem.groupId} - {chatItem.username}</p>
+                                        {chatItem.lastMessage != null ?
+                                            <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
+                                            : <p>Group Created</p>
+                                        }
+                                        <p>{new Date(chatItem.updated_at).toISOString()}</p>
+                                    </div>
+                                </div>
                             return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem.userId)}>
                                 <UserPicture userId={chatItem.userId} />
                                 <div className="user-item-data">

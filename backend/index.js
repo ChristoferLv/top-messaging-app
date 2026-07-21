@@ -12,6 +12,7 @@ import jwt from 'jsonwebtoken';
 
 import http from 'http'
 import { Server } from 'socket.io'
+import groupRouter from './routes/groupsRoutes.js';
 
 
 const app = express();
@@ -63,6 +64,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/chats", chatRoutes);
+app.use("/groups", groupRouter);
 app.use("/contacts", friendRouter);
 app.use("/users", userRoutes);
 app.use("/auth", authRouter);
@@ -89,7 +91,13 @@ io.on('connection', (socket) => {
   console.log("sokcet info", socket.id);
   console.log("sokcet info", socket.handshake.auth);
   console.log(socket.handshake)
-  var decoded = jwt.verify(socket.handshake.auth.token.split(" ")[1], process.env.JWT_SECRET);
+  let decoded = null;
+  try {
+    decoded = jwt.verify(socket.handshake.auth.token.split(" ")[1], process.env.JWT_SECRET);
+  } catch (e) {
+    console.log(e);
+    return;
+  }
   console.log(decoded) // bar
   socket.user = { userId: decoded.id };
   socket.join(`user:${decoded.id}`);

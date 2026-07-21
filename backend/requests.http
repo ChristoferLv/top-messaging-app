@@ -1,4 +1,4 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4NDMwMTM2MCwiZXhwIjoxNzg0Mzg3NzYwfQ.LqnUuS17Il_p9CAtwELhDBmT1MHlbbyWwwqQypHNc0E
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc4NDQ4NjcyOCwiZXhwIjoxNzg0NTczMTI4fQ.wbkFHsO8qJab0Y-dG4doyIQ0GIrq-0sJmVqWRVuJkXM
 
 ###
 
@@ -17,7 +17,7 @@ POST http://localhost:3000/auth/login
 content-type: application/json
 
 {
-    "username":"user1",
+    "username":"user2",
     "password":"pass"
 }
 
@@ -58,7 +58,7 @@ Authorization: {{token}}
 
 ###
 
-GET http://localhost:3000/chats/chatWith/6
+GET http://localhost:3000/chats/chatWith/1
 Authorization: {{token}}
 
 ###
@@ -68,12 +68,12 @@ Authorization: {{token}}
 
 ###
 
-POST http://localhost:3000/chats/29/messages
+POST http://localhost:3000/chats/30/messages
 content-type: application/json
 Authorization: {{token}}
 
 {
-    "message":"Hello World!"
+    "message":"Hello Socket3"
 }
 
 ###
@@ -92,4 +92,14 @@ GET http://localhost:3000/chats/29/messages
 content-type: application/json
 Authorization: {{token}}
 
+###
+
+POST http://localhost:3000/groups
+content-type: application/json
+Authorization: {{token}}
+
+{
+    "name":"Group1",
+    "participants":[1,2,3]
+}
 ###
