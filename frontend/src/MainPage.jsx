@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, fetchMyChats, fetchPicture, logOut, sendFirstMessage, sendMessage } from "./api/requests";
+import { checkChatWith, fetchAllUsers, fetchMessagesOfChat, fetchMessagesOfGroup, fetchMyChats, fetchPicture, logOut, sendFirstMessage, sendGroupMessage, sendMessage } from "./api/requests";
 import { AuthContext } from "./AuthContext";
 import MyContacts from "./components/MyContacts";
 import ProfilePage from "./components/Profile";
@@ -35,8 +35,16 @@ function MainPage() {
 
     const getMessagesOfChat = useCallback(async () => {
         try {
-            if (chat.chat != null) {
-
+            if (chat != null) {
+                console.log("here")
+                if (chat.chatType == "GROUP") {
+                    console.log("here2")
+                    const messages = await fetchMessagesOfGroup(chat.groupId);
+                    if (messages) {
+                        setMessages(messages.data);
+                    }
+                    return;
+                }
                 const messages = await fetchMessagesOfChat(chat.chat.id);
                 if (messages) {
                     setMessages(messages.data);
@@ -143,7 +151,7 @@ function MainPage() {
 
     useEffect(() => {
         if (chat != null) {
-            // console.log("get the messages")
+            console.log("get the messages")
             getMessagesOfChat();
         }
     }, [chat])
@@ -155,6 +163,7 @@ function MainPage() {
         setshowProfile(-1);
         setViewChats(true);
         if (chat.chatType == "GROUP") {
+            setChat(chat);
             return;
         }
         const chatExistsData = await checkChatWith(chat.userId);
@@ -171,14 +180,8 @@ function MainPage() {
         console.log(data)
 
         fileInputRef.current.value = "";
-        if (!chat) {
-            const result = await sendFirstMessage(chat.user.id, data);
-            if (result) {
-                setChat(result.data.chat);
-                fetchChats();
-            }
-        } else {
-            const result = await sendMessage(chat.id, data);
+        if (chat?.chatType == "GROUP") {
+            const result = await sendGroupMessage(chat.groupId, data);
             if (result) {
                 const newChats = chatsList.map((newChat) => {
                     if (newChat.chatId == chat.id) {
@@ -188,8 +191,32 @@ function MainPage() {
                 });
                 setChatsList(newChats);
             }
+            const newMessages = await fetchMessagesOfGroup(chat.groupId);
+            if (newMessages) {
+                setMessages(newMessages.data);
+            }
+            setTypingMessage("");
+            return;
         }
-        const newMessages = await fetchMessagesOfChat(chat.id);
+        if (!chat) {
+            const result = await sendFirstMessage(chat.user.id, data);
+            if (result) {
+                setChat(result.data.chat);
+                fetchChats();
+            }
+        } else {
+            const result = await sendMessage(chat.chat.id, data);
+            if (result) {
+                const newChats = chatsList.map((newChat) => {
+                    if (newChat.chatId == chat.chat.id) {
+                        return { ...newChat, updated_at: new Date().toISOString(), lastMessage: result.data }
+                    }
+                    return newChat;
+                });
+                setChatsList(newChats);
+            }
+        }
+        const newMessages = await fetchMessagesOfChat(chat.chat.id);
         if (newMessages) {
             setMessages(newMessages.data);
         }
@@ -214,7 +241,7 @@ function MainPage() {
 
     console.log("chats list", chatsList)
     console.log("sorted chats list", sortedChatsList)
-    console.log("chat", chat)
+    console.log("chat", chat, chat?.chatType)
 
     const fileInputRef = useRef(null);
 
@@ -249,45 +276,87 @@ function MainPage() {
     if (showProfile != -1) {
         mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} />
     } else if (chat) {
-        mainPane = <div className="chat-pane">
-            <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
-                <UserPicture userId={chat.user.id} />
-                <p>{chat.user.username}</p>
-            </div>
-            <div className="chat-body">
-                <div className="messages-list" ref={containerRef}>
-                    {/* <p>Messages</p> */}
-                    {messages && messages.map((message) => {
-                        if (message.type == "MIDIA")
+        if (chat.chatType == "GROUP") {
+            mainPane = <div className="chat-pane">
+                <div className="chat-header" onClick={() => { }}>
+                    {/* <UserPicture userId={chat.user.id} /> */}
+                    <p>{chat.username}</p>
+                </div>
+                <div className="chat-body">
+                    <div className="messages-list" ref={containerRef}>
+                        {/* <p>Messages</p> */}
+                        {messages && messages.map((message) => {
+                            if (message.type == "MIDIA")
+                                return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                                    <MidiaMessage midiaId={message.id} />
+                                </div>
                             return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                <MidiaMessage midiaId={message.id} />
+                                <p>{message.id} - {message.content}</p>
+                                <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
                             </div>
-                        return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                            <p>{message.id} - {message.content}</p>
-                            <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
-                        </div>
-                    })}
+                        })}
+                    </div>
+                </div>
+                <div className="chat-controls">
+                    <form onSubmit={handleSendMessage} action="">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            name="midia"
+                            style={{ display: "none" }}
+                            onChange={handleUploadImage}
+                        />
+                        <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
+                        <button className="send-picture"
+                            type="button"
+                            onClick={handleClickAttach}
+                        ><img src="../public/attach-icon.png" alt="" />
+                        </button>
+                    </form>
                 </div>
             </div>
-            <div className="chat-controls">
-                <form onSubmit={handleSendMessage} action="">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        name="midia"
-                        style={{ display: "none" }}
-                        onChange={handleUploadImage}
-                    />
-                    <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
-                    <button className="send-picture"
-                        type="button"
-                        onClick={handleClickAttach}
-                    ><img src="../public/attach-icon.png" alt="" />
-                    </button>
-                </form>
+        } else {
+            mainPane = <div className="chat-pane">
+                <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
+                    <UserPicture userId={chat.user.id} />
+                    <p>{chat.user.username}</p>
+                </div>
+                <div className="chat-body">
+                    <div className="messages-list" ref={containerRef}>
+                        {/* <p>Messages</p> */}
+                        {messages && messages.map((message) => {
+                            if (message.type == "MIDIA")
+                                return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                                    <MidiaMessage midiaId={message.id} />
+                                </div>
+                            return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                                <p>{message.id} - {message.content}</p>
+                                <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
+                            </div>
+                        })}
+                    </div>
+                </div>
+                <div className="chat-controls">
+                    <form onSubmit={handleSendMessage} action="">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            name="midia"
+                            style={{ display: "none" }}
+                            onChange={handleUploadImage}
+                        />
+                        <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
+                        <button className="send-picture"
+                            type="button"
+                            onClick={handleClickAttach}
+                        ><img src="../public/attach-icon.png" alt="" />
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
+        }
     }
 
     return (

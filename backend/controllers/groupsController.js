@@ -36,7 +36,8 @@ async function createGroup(req, res) {
 async function sendGroupMessage(req, res) {
     const groupId = parseInt(req.params.groupId);
     const userId = req.user.id;
-    const message = req.body.content;
+    const message = req.body.message;
+    console.log("content", req.body)
 
     try {
         const sendMessageResult = await prisma.$transaction(async (tx) => {
@@ -58,8 +59,8 @@ async function sendGroupMessage(req, res) {
                 data: {
                     content: message,
                     type: 'TEXT',
-                    groupChatsId: groupId,
-                    sender: userId,
+                    groupChatId: groupId,
+                    senderId: userId,
                 }
             });
             return messageResult;
@@ -78,9 +79,10 @@ async function sendGroupMessage(req, res) {
  */
 async function getMessageOfGroup(req, res) {
     const groupId = parseInt(req.params.groupId);
+    console.log("groupid", groupId)
     try {
         const messages = await prisma.groupMessages.findMany({
-            where: { id: groupId },
+            where: { groupChatId: groupId },
             include: {
                 // chat: {include:{sender:}},
                 // sender: { omit: { password: true, created_at: true, picture:true } }
@@ -88,7 +90,7 @@ async function getMessageOfGroup(req, res) {
             },
             orderBy: { created_at: 'asc' }
         });
-
+        console.log("group messages", messages)
         res.status(200).send({ success: true, data: messages });
     } catch (e) {
         console.log(e);

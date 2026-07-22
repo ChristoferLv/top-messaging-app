@@ -17,7 +17,7 @@ chatRoutes.get("/mine", passport.authenticate('jwt', { session: false }), listMy
 chatRoutes.get("/chatWith/:userId", passport.authenticate('jwt', { session: false }), checkChatExistsWith);
 chatRoutes.post("/:chatId/messages", upload.single("midia"), passport.authenticate('jwt', { session: false }), sendMessage)
 chatRoutes.post("/:userId/messages/first", upload.single("midia"), passport.authenticate('jwt', { session: false }), sendFirstMessage)
-chatRoutes.get("/:chatId/messages", passport.authenticate('jwt', { session: false }), getMessageOfChat)
-chatRoutes.get("/midia/:midiaId", passport.authenticate('jwt', { session: false }), getMessageMidia)
+chatRoutes.get("/:chatId/messages", passport.authenticate('jwt', { session: false }), getMessageOfChat);
+chatRoutes.get("/midia/:midiaId", passport.authenticate('jwt', { session: false }), getMessageMidia);
 
 export default chatRoutes

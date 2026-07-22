@@ -205,6 +205,56 @@ async function fetchMessagesOfChat(chatId) {
     }
 }
 
+async function sendGroupMessage(groupId, data) {
+    const formData = new FormData();
+    formData.append("midia", data.midia);
+    formData.append("message", data.message)
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}/messages`, {
+            method: 'Post',
+            body: formData,
+
+            headers: {
+                Authorization: token,
+            },
+        });
+        if (request.ok) {
+            const chatData = await request.json();
+            return chatData;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function fetchMessagesOfGroup(groupId) {
+    console.log("fetching messages of", groupId)
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}/messages`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const messages = await request.json();
+            return messages;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+
+
+
+
 async function findUserWithUsername(username) {
     console.log("Search for", username)
     try {
@@ -390,6 +440,8 @@ export {
     sendFirstMessage,
     sendMessage,
     fetchMessagesOfChat,
+    sendGroupMessage,
+    fetchMessagesOfGroup,
     addContact,
     getMyContacts,
     findUserWithUsername,
