@@ -17,7 +17,6 @@ function MainPage() {
     const [typingMessage, setTypingMessage] = useState("");
     const { user, isLoading } = useContext(AuthContext);
     const containerRef = useRef(null);
-    const [chatingUser, setChatingUser] = useState(null);
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
 
@@ -36,9 +35,12 @@ function MainPage() {
 
     const getMessagesOfChat = useCallback(async () => {
         try {
-            const messages = await fetchMessagesOfChat(chat.id);
-            if (messages) {
-                setMessages(messages.data);
+            if (chat.chat != null) {
+
+                const messages = await fetchMessagesOfChat(chat.chat.id);
+                if (messages) {
+                    setMessages(messages.data);
+                }
             }
         } catch (e) {
             console.log(e);
@@ -51,7 +53,6 @@ function MainPage() {
         const handleEsc = (event) => {
             if (event.key === 'Escape') {
                 setChat(null);
-                setChatingUser(null);
                 setshowProfile(-1);
             }
         };
@@ -148,15 +149,17 @@ function MainPage() {
     }, [chat])
 
 
-    async function handleSelectUser(userId) {
+    async function handleSelectUser(chat) {
         setChat(null);
         setMessages(null);
         setshowProfile(-1);
         setViewChats(true);
-        const chatExistsData = await checkChatWith(userId);
-        setChatingUser(chatExistsData.data.user);
+        if (chat.chatType == "GROUP") {
+            return;
+        }
+        const chatExistsData = await checkChatWith(chat.userId);
         if (chatExistsData.isChat) {
-            setChat(chatExistsData.data.chat);
+            setChat(chatExistsData.data);
         } else {
             setChat(null);
         }
@@ -169,7 +172,7 @@ function MainPage() {
 
         fileInputRef.current.value = "";
         if (!chat) {
-            const result = await sendFirstMessage(chatingUser, data);
+            const result = await sendFirstMessage(chat.user.id, data);
             if (result) {
                 setChat(result.data.chat);
                 fetchChats();
@@ -211,7 +214,7 @@ function MainPage() {
 
     console.log("chats list", chatsList)
     console.log("sorted chats list", sortedChatsList)
-    console.log(chatingUser)
+    console.log("chat", chat)
 
     const fileInputRef = useRef(null);
 
@@ -236,21 +239,20 @@ function MainPage() {
         setshowProfile(userId);
     }
 
-     async function closeUserProfile(userId) {
+    async function closeUserProfile(userId) {
         setshowProfile(-1);
     }
 
 
     let mainPane = <NoChatHolder />;
 
-    console.log(showProfile)
     if (showProfile != -1) {
-        mainPane = <ProfilePage userId={showProfile} close={closeUserProfile}/>
-    } else if (chatingUser) {
+        mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} />
+    } else if (chat) {
         mainPane = <div className="chat-pane">
-            <div className="chat-header" onClick={() => seeUserProfile(chatingUser.id)}>
-                <UserPicture userId={chatingUser.id} />
-                <p>{chatingUser.username}</p>
+            <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
+                <UserPicture userId={chat.user.id} />
+                <p>{chat.user.username}</p>
             </div>
             <div className="chat-body">
                 <div className="messages-list" ref={containerRef}>
@@ -289,7 +291,6 @@ function MainPage() {
     }
 
     return (
-
         <>
             <div className="main-page">
                 {viewChats ? (
@@ -311,7 +312,7 @@ function MainPage() {
                         </div>
                         {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
                             if (chatItem.chatType == ChatType.GROUP)
-                                return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem.userId)}>
+                                return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
                                     <UserPicture userId={chatItem.groupId} />
                                     <div className="user-item-data">
                                         <p>{chatItem.groupId} - {chatItem.username}</p>
@@ -322,7 +323,7 @@ function MainPage() {
                                         <p>{new Date(chatItem.updated_at).toISOString()}</p>
                                     </div>
                                 </div>
-                            return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem.userId)}>
+                            return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
                                 <UserPicture userId={chatItem.userId} />
                                 <div className="user-item-data">
                                     <p>{chatItem.userId} - {chatItem.username}</p>

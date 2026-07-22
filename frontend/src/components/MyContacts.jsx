@@ -83,7 +83,7 @@ function MyContacts({ closeContactsList, selectUser }) {
                 </div>
 
                 {contactsList.length > 0 ? contactsList.map((contact) => {
-                    return <div key={contact.contact.id} className="user-item" onClick={(e) => { selectUser(contact.contact.id) }}>
+                    return <div key={contact.contact.id} className="user-item" onClick={(e) => { selectUser(contact.contact) }}>
                         <p>{contact.contact.id} - {contact.contact.username}</p>
                     </div>
                 }) : <p>No contacts</p>}

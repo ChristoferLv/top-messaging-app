@@ -23,6 +23,19 @@ const validateNewUser = [
     }).withMessage("Password fields must match"),
 ];
 
+async function checkToken(req, res) {
+    console.log(req.headers)
+    try {
+        jwt.verify(req.headers.authorization.split(" ")[1], process.env.JWT_SECRET);
+        return res.status(200).send({ success: true, valid: true });
+    } catch (e) {
+        if (e.name === 'TokenExpiredError') {
+            console.log('Token has expired!'); // Handle expired token (e.g., prompt for refresh token)
+        }
+        console.log(e);
+    }
+}
+
 async function getMe(req, res) {
     try {
         const result = await prisma.users.findUnique({ where: { id: req.user.id }, omit: { password: true, picture: true } });
@@ -86,6 +99,7 @@ const register = [
 ]
 
 export {
+    checkToken,
     getMe,
     login,
     register,

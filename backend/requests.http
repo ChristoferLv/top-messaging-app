@@ -1,4 +1,8 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4NDU5MDc5OSwiZXhwIjoxNzg0Njc3MTk5fQ.wVcKiTBbUpWTyKHt7PW4myun3uxNTz5XPqeu3FCXS5I
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4NDY3ODY3OCwiZXhwIjoxNzg0Njc4NjkzfQ.1N8ubjNC_-kKc0utmRv7BkLVr6npTc4H9hMZ1U4jj9A
+
+GET http://localhost:3000/auth/check
+content-type: application/json
+Authorization: {{token}}
 
 ###
 
@@ -63,7 +67,7 @@ Authorization: {{token}}
 
 ###
 
-GET http://localhost:3000/chats/chatWith/1
+GET http://localhost:3000/chats/chatWith/2
 Authorization: {{token}}
 
 ###

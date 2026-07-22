@@ -36,7 +36,7 @@ async function checkChatExistsWith(req, res) {
             }
         });
         if (!chat)
-            return res.status(200).send({ success: true, isChat: false, data: { user: user } });
+            return res.status(200).send({ success: true, isChat: false, data: { user: user, chat:null } });
         return res.status(200).send({ success: true, isChat: true, data: { user: user, chat: chat } });
     } catch (e) {
         console.log(e);
