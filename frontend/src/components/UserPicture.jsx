@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { fetchPicture } from "../api/requests";
 
-function UserPicture({ userId }) {
+function UserPicture({ id, type }) {
     const [pictureB64, setPicture] = useState(null);
     const [mime, picture] = pictureB64 ? pictureB64.split(":") : [null, null];
-
     useEffect(() => {
         async function getPicture() {
-            if (userId) {
-                const picture = await fetchPicture(userId);
+            if (type == "GROUP"){
+                return;
+            }
+            if (id) {
+                const picture = await fetchPicture(id);
                 setPicture(picture.data);
             }
         }
         getPicture();
-    }, [userId])
+    }, [id, type])
 
     return (
         <>

@@ -212,12 +212,36 @@ async function sendGroupMessage(groupId, data) {
     try {
         const token = localStorage.getItem("token");
         const request = await fetch(`http://localhost:3000/groups/${groupId}/messages`, {
-            method: 'Post',
+            method: 'POST',
             body: formData,
 
             headers: {
+                
                 Authorization: token,
             },
+        });
+        if (request.ok) {
+            const chatData = await request.json();
+            return chatData;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function createGroup(groupData) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/`, {
+            method: 'POST',
+            body: JSON.stringify(groupData),
+
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
         });
         if (request.ok) {
             const chatData = await request.json();
@@ -442,6 +466,7 @@ export {
     fetchMessagesOfChat,
     sendGroupMessage,
     fetchMessagesOfGroup,
+    createGroup,
     addContact,
     getMyContacts,
     findUserWithUsername,

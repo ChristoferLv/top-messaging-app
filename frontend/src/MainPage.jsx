@@ -7,6 +7,7 @@ import UserPicture from "./components/UserPicture";
 import { io } from 'socket.io-client';
 import MidiaMessage from "./components/MidiaMessage";
 import { ChatType } from "./defaults";
+import NewGroupPage from "./components/NewGroupPage";
 
 // let socket = null;
 
@@ -24,6 +25,8 @@ function MainPage() {
 
     const [viewChats, setViewChats] = useState(true);
     const [showProfile, setshowProfile] = useState(-1);
+    const [createGroup, setCteateGroup] = useState(false);
+
     const fetchChats = useCallback(async () => {
         try {
             const chats = await fetchMyChats();
@@ -61,6 +64,7 @@ function MainPage() {
         const handleEsc = (event) => {
             if (event.key === 'Escape') {
                 setChat(null);
+                setCteateGroup(false);
                 setshowProfile(-1);
             }
         };
@@ -158,10 +162,11 @@ function MainPage() {
 
 
     async function handleSelectUser(chat) {
-        setChat(null);
+        // setChat(null);
         setMessages(null);
         setshowProfile(-1);
         setViewChats(true);
+        setCteateGroup(false);
         if (chat.chatType == "GROUP") {
             setChat(chat);
             return;
@@ -231,8 +236,8 @@ function MainPage() {
         setViewChats(c => !c);
     }
 
-    function handleToggleProfile() {
-        setshowProfile(c => !c);
+    function handleShowCreateGroup() {
+        setCteateGroup(c => !c);
     }
 
     function handleLogout() {
@@ -263,6 +268,7 @@ function MainPage() {
     }
 
     async function seeUserProfile(userId) {
+        setCteateGroup(false);
         setshowProfile(userId);
     }
 
@@ -273,13 +279,16 @@ function MainPage() {
 
     let mainPane = <NoChatHolder />;
 
-    if (showProfile != -1) {
+    if (createGroup) {
+        mainPane = <NewGroupPage close={handleShowCreateGroup}/>
+    }
+    else if (showProfile != -1) {
         mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} />
     } else if (chat) {
         if (chat.chatType == "GROUP") {
             mainPane = <div className="chat-pane">
                 <div className="chat-header" onClick={() => { }}>
-                    {/* <UserPicture userId={chat.user.id} /> */}
+                    <UserPicture id={chat.groupId} type={chat.chatType} />
                     <p>{chat.username}</p>
                 </div>
                 <div className="chat-body">
@@ -319,7 +328,7 @@ function MainPage() {
         } else {
             mainPane = <div className="chat-pane">
                 <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
-                    <UserPicture userId={chat.user.id} />
+                    <UserPicture id={chat.user.id} type={chat.chatType} />
                     <p>{chat.user.username}</p>
                 </div>
                 <div className="chat-body">
@@ -371,7 +380,7 @@ function MainPage() {
                         <div className="main-header">
                             <p className="app-title">WhatsUp</p>
                             <div className="profile-btn" onClick={() => seeUserProfile(user.id)}>
-                                <UserPicture userId={user.id} />
+                                <UserPicture id={user.id} type={"NORMAL"} />
                                 <p>Olá {user.username}</p>
                             </div>
                             <div onClick={(e) => handleToggleSidePane()} className="new-chat-btn">
@@ -382,7 +391,7 @@ function MainPage() {
                         {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
                             if (chatItem.chatType == ChatType.GROUP)
                                 return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
-                                    <UserPicture userId={chatItem.groupId} />
+                                    <UserPicture id={chatItem.groupId} type={chatItem.chatType} />
                                     <div className="user-item-data">
                                         <p>{chatItem.groupId} - {chatItem.username}</p>
                                         {chatItem.lastMessage != null ?
@@ -393,7 +402,7 @@ function MainPage() {
                                     </div>
                                 </div>
                             return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
-                                <UserPicture userId={chatItem.userId} />
+                                <UserPicture id={chatItem.userId} type={chatItem.chatType} />
                                 <div className="user-item-data">
                                     <p>{chatItem.userId} - {chatItem.username}</p>
                                     <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
@@ -402,7 +411,7 @@ function MainPage() {
                             </div>
                         }) : <p>No users</p>}
                     </div>) : (
-                    <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} />
+                    <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} createGroup={handleShowCreateGroup} />
                 )}
                 {mainPane}
             </div >

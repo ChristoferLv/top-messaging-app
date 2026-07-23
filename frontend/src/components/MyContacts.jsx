@@ -7,7 +7,7 @@ async function loadContacts() {
     return contacts.data;
 }
 
-function MyContacts({ closeContactsList, selectUser }) {
+function MyContacts({ closeContactsList, selectUser, createGroup }) {
     const [contactsList, setContactsList] = useState([]);
     const [showAddContact, setShowAddContact] = useState(false);
     const [searchUsername, setSearchUsername] = useState("");
@@ -59,6 +59,10 @@ function MyContacts({ closeContactsList, selectUser }) {
                 <div className="back-btn" onClick={(e) => closeContactsList()}>
                     <div className="icon back-icon"></div>
                     <p>Back</p>
+                </div>
+                <div className="back-btn" onClick={(e) => createGroup()}>
+                    <div className="icon back-icon"></div>
+                    <p>New Group</p>
                 </div>
                 <div className="new-contact">
                     <p>Add new contact</p>

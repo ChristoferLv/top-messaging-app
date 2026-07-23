@@ -84,6 +84,7 @@ model Midias {
 model GroupChats {
   id            Int             @id @default(autoincrement())
   name          String          @db.VarChar(40)
+  description   String?
   creatorId     Int
   creator       Users           @relation(fields: [creatorId], references: [id])
   type          ChatType        @default(GROUP)

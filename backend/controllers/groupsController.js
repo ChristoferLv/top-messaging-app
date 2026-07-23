@@ -8,11 +8,13 @@ import { prisma } from '../lib/prisma.js';
 async function createGroup(req, res) {
     const userId = req.user.id;
     const groupName = req.body.name;
-    const participants = req.body.participants;
+    const members = req.body.members;
 
-    const treatedParticipants = participants.map((participant) => {
+    const treatedMembers = members.map((participant) => {
         return { userId: participant };
     })
+
+    treatedMembers.push({ userId: userId });
 
     const result = await prisma.groupChats.create({
         data: {
@@ -21,12 +23,12 @@ async function createGroup(req, res) {
             type: 'GROUP',
             usersGroups: {
                 createMany: {
-                    data: treatedParticipants
+                    data: treatedMembers
                 }
             }
         }
     })
-    return res.status(201).send({success:true, data:result});
+    return res.status(201).send({ success: true, data: result });
 }
 
 /**
