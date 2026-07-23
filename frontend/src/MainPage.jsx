@@ -8,6 +8,7 @@ import { io } from 'socket.io-client';
 import MidiaMessage from "./components/MidiaMessage";
 import { ChatType } from "./defaults";
 import NewGroupPage from "./components/NewGroupPage";
+import GroupDetailsPage from "./components/GroupDetailsPage";
 
 // let socket = null;
 
@@ -20,6 +21,7 @@ function MainPage() {
     const containerRef = useRef(null);
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
+    const [seeGroup, setSeeGroup] = useState(-1);
 
     const sortedChatsList = chatsList.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
@@ -161,17 +163,19 @@ function MainPage() {
     }, [chat])
 
 
-    async function handleSelectUser(chat) {
+    async function handleSelectUser(newChat) {
         // setChat(null);
         setMessages(null);
+        setSeeGroup(-1);
         setshowProfile(-1);
         setViewChats(true);
         setCteateGroup(false);
-        if (chat.chatType == "GROUP") {
-            setChat(chat);
+        if (newChat.chatType == "GROUP") {
+            setMessages(messages);
+            setChat(newChat);
             return;
         }
-        const chatExistsData = await checkChatWith(chat.userId);
+        const chatExistsData = await checkChatWith(newChat.userId);
         if (chatExistsData.isChat) {
             setChat(chatExistsData.data);
         } else {
@@ -268,6 +272,7 @@ function MainPage() {
     }
 
     async function seeUserProfile(userId) {
+        setSeeGroup(-1);
         setCteateGroup(false);
         setshowProfile(userId);
     }
@@ -276,18 +281,28 @@ function MainPage() {
         setshowProfile(-1);
     }
 
+    async function seeGroupDetails(groupId) {
+        setSeeGroup(groupId);
+    }
+
+    async function closeGroupDetails() {
+        setSeeGroup(-1);
+    }
+
 
     let mainPane = <NoChatHolder />;
 
-    if (createGroup) {
-        mainPane = <NewGroupPage close={handleShowCreateGroup}/>
+    if (seeGroup != -1) {
+        mainPane = <GroupDetailsPage groupId={seeGroup} close={closeGroupDetails} refetchChats={fetchChats} />
+    } else if (createGroup) {
+        mainPane = <NewGroupPage close={handleShowCreateGroup} />
     }
     else if (showProfile != -1) {
         mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} />
     } else if (chat) {
         if (chat.chatType == "GROUP") {
             mainPane = <div className="chat-pane">
-                <div className="chat-header" onClick={() => { }}>
+                <div className="chat-header" onClick={() => { seeGroupDetails(chat.groupId) }}>
                     <UserPicture id={chat.groupId} type={chat.chatType} />
                     <p>{chat.username}</p>
                 </div>
@@ -389,8 +404,9 @@ function MainPage() {
                             </div>
                         </div>
                         {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
+                            console.log(chatItem)
                             if (chatItem.chatType == ChatType.GROUP)
-                                return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
+                                return <div key={`${chatItem.chatType}-${chatItem.groupId}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
                                     <UserPicture id={chatItem.groupId} type={chatItem.chatType} />
                                     <div className="user-item-data">
                                         <p>{chatItem.groupId} - {chatItem.username}</p>
@@ -401,7 +417,7 @@ function MainPage() {
                                         <p>{new Date(chatItem.updated_at).toISOString()}</p>
                                     </div>
                                 </div>
-                            return <div key={chatItem.userId} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
+                            return <div key={`${chatItem.chatType}-${chatItem.userId}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
                                 <UserPicture id={chatItem.userId} type={chatItem.chatType} />
                                 <div className="user-item-data">
                                     <p>{chatItem.userId} - {chatItem.username}</p>

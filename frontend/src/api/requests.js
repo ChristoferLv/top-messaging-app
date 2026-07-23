@@ -216,13 +216,34 @@ async function sendGroupMessage(groupId, data) {
             body: formData,
 
             headers: {
-                
+
                 Authorization: token,
             },
         });
         if (request.ok) {
             const chatData = await request.json();
             return chatData;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function fetchGroupDetails(groupId) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}/details`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const messages = await request.json();
+            return messages;
         }
     } catch (e) {
         console.log(e);
@@ -274,6 +295,71 @@ async function fetchMessagesOfGroup(groupId) {
         throw e;
     }
 }
+
+async function removeMemberFromGroup(groupId, memberId) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}/members/${memberId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const messages = await request.json();
+            return messages;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function addMemberToGroup(groupId, memberId) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}/members/${memberId}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const messages = await request.json();
+            return messages;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function editGroup(groupId, data) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify(data)
+        });
+        if (request.ok) {
+            const messages = await request.json();
+            return messages;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 
 
 
@@ -453,6 +539,8 @@ async function fetchMessageMidia(midiaId) {
 }
 
 
+
+
 export {
     checkTokenExpired,
     login,
@@ -466,7 +554,11 @@ export {
     fetchMessagesOfChat,
     sendGroupMessage,
     fetchMessagesOfGroup,
+    fetchGroupDetails,
     createGroup,
+    removeMemberFromGroup,
+    addMemberToGroup,
+    editGroup,
     addContact,
     getMyContacts,
     findUserWithUsername,

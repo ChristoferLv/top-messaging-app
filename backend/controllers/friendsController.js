@@ -8,7 +8,7 @@ async function listMyContacts(req, res) {
             where: { contactOwnerId: userId },
             include: {
                 contact: {
-                    omit: { password: true, created_at: true }
+                    omit: { password: true, created_at: true, picture: true }
                 }
             }
         });

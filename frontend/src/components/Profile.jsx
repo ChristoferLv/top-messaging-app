@@ -54,7 +54,7 @@ function ProfilePage({ userId, close}) {
         setEditedProfile(profile);
     }
 
-    async function handleChange(e) {
+    function handleChange(e) {
         const whoChanged = event.target;
         const newValues = { ...editedProfile, [whoChanged.name]: whoChanged.value }
         setEditedProfile(newValues);
