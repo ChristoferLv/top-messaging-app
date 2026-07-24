@@ -3,7 +3,7 @@ import { createGroup, getMyContacts } from "../api/requests";
 import { ChatType } from "../defaults";
 import UserPicture from "./UserPicture";
 
-function NewGroupPage({close}) {
+function NewGroupPage({close, refetchChats}) {
     const [myContacts, setMyContacts] = useState([]);
     const [groupData, setgroupData] = useState({ name: "", description: "", members: [] });
 
@@ -39,6 +39,7 @@ function NewGroupPage({close}) {
     async function handleCreateGroup() {
         const result = await createGroup(groupData);
         if (result) {
+            refetchChats();
             close();
         }
     }

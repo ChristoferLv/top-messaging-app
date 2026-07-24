@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchMessageMidia } from "../api/requests";
 
-function MidiaMessage({ midiaId }) {
+function MidiaMessage({ midiaId, origin }) {
     const [pictureB64, setPicture] = useState(null);
     const [mime, picture] = pictureB64 ? pictureB64.split(":") : [null, null];
     const [modal, setModal] = useState(false);
 
     useEffect(() => {
         async function getPicture() {
-            const picture = await fetchMessageMidia(midiaId);
+            const picture = await fetchMessageMidia(midiaId, origin);
             console.log(picture)
             setPicture(picture.data.content);
         }

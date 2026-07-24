@@ -127,7 +127,8 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
                                 id={member.user.id}
                                 username={member.user.username}
                                 isMember={true}
-                                handleChangeMembers={handleChangeMembers} />
+                                handleChangeMembers={handleChangeMembers} 
+                                showControls={isOwner}/>
                         })
                     ) : (
                         contactsToAdd.length > 0 ? contactsToAdd.map((contact) => {
@@ -135,7 +136,8 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
                                 id={contact.contact.id}
                                 username={contact.contact.username}
                                 isMember={false}
-                                handleChangeMembers={handleChangeMembers} />
+                                handleChangeMembers={handleChangeMembers} 
+                                showControls={isOwner}/>
                         }) : <p>No contacts to add</p>
                     )}
 

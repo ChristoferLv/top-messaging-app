@@ -134,7 +134,7 @@ async function checkChatWith(userId) {
     }
 }
 
-async function sendFirstMessage(chatId, message) {
+async function sendFirstMessage(chatId, data) {
     const formData = new FormData();
     formData.append("midia", data.midia);
     formData.append("message", data.message)
@@ -517,10 +517,10 @@ async function fetchPicture(userId) {
     }
 }
 
-async function fetchMessageMidia(midiaId) {
+async function fetchMessageMidia(midiaId, origin) {
     try {
         const token = localStorage.getItem("token");
-        const request = await fetch("http://localhost:3000/chats/midia/" + midiaId, {
+        const request = await fetch(`http://localhost:3000/midias/${origin}/` + midiaId, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',

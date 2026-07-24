@@ -40,6 +40,7 @@ function MainPage() {
 
     const getMessagesOfChat = useCallback(async () => {
         try {
+            console.log("chatt", chat)
             if (chat != null) {
                 console.log("here")
                 if (chat.chatType == "GROUP") {
@@ -50,9 +51,11 @@ function MainPage() {
                     }
                     return;
                 }
-                const messages = await fetchMessagesOfChat(chat.chat.id);
-                if (messages) {
-                    setMessages(messages.data);
+                if (chat.chat != null) {
+                    const messages = await fetchMessagesOfChat(chat.chat.id);
+                    if (messages) {
+                        setMessages(messages.data);
+                    }
                 }
             }
         } catch (e) {
@@ -160,6 +163,7 @@ function MainPage() {
             console.log("get the messages")
             getMessagesOfChat();
         }
+        setTypingMessage("");
     }, [chat])
 
 
@@ -175,12 +179,11 @@ function MainPage() {
             setChat(newChat);
             return;
         }
-        const chatExistsData = await checkChatWith(newChat.userId);
-        if (chatExistsData.isChat) {
-            setChat(chatExistsData.data);
-        } else {
-            setChat(null);
-        }
+        console.log("newchat", newChat)
+        const chatExistsData = await checkChatWith(newChat.id);
+
+        setChat(chatExistsData.data);
+
     }
 
     async function handleSendMessage(e) {
@@ -207,11 +210,16 @@ function MainPage() {
             setTypingMessage("");
             return;
         }
-        if (!chat) {
+        if (!chat.chat) {
             const result = await sendFirstMessage(chat.user.id, data);
             if (result) {
-                setChat(result.data.chat);
+                console.log("new chat data", result.data)
+                setChat(result.data);
                 fetchChats();
+                const newMessages = await fetchMessagesOfChat(result.chat.id);
+                if (newMessages) {
+                    setMessages(newMessages.data);
+                }
             }
         } else {
             const result = await sendMessage(chat.chat.id, data);
@@ -224,10 +232,10 @@ function MainPage() {
                 });
                 setChatsList(newChats);
             }
-        }
-        const newMessages = await fetchMessagesOfChat(chat.chat.id);
-        if (newMessages) {
-            setMessages(newMessages.data);
+            const newMessages = await fetchMessagesOfChat(chat.chat.id);
+            if (newMessages) {
+                setMessages(newMessages.data);
+            }
         }
         setTypingMessage("");
     }
@@ -265,7 +273,7 @@ function MainPage() {
     async function handlePictureSubmit(e) {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
-        // const result = await sendPicture(data);
+        const result = await sendPicture(data);
         if (result) {
             setPicture(result.data);
         }
@@ -295,7 +303,7 @@ function MainPage() {
     if (seeGroup != -1) {
         mainPane = <GroupDetailsPage groupId={seeGroup} close={closeGroupDetails} refetchChats={fetchChats} />
     } else if (createGroup) {
-        mainPane = <NewGroupPage close={handleShowCreateGroup} />
+        mainPane = <NewGroupPage close={handleShowCreateGroup} refetchChats={fetchChats}/>
     }
     else if (showProfile != -1) {
         mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} />
@@ -312,7 +320,7 @@ function MainPage() {
                         {messages && messages.map((message) => {
                             if (message.type == "MIDIA")
                                 return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                    <MidiaMessage midiaId={message.id} />
+                                    <MidiaMessage midiaId={message.id} origin={ChatType.GROUP} />
                                 </div>
                             return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
                                 <p>{message.id} - {message.content}</p>
@@ -352,7 +360,7 @@ function MainPage() {
                         {messages && messages.map((message) => {
                             if (message.type == "MIDIA")
                                 return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                    <MidiaMessage midiaId={message.id} />
+                                    <MidiaMessage midiaId={message.id} origin={ChatType.NORMAL} />
                                 </div>
                             return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
                                 <p>{message.id} - {message.content}</p>
@@ -403,30 +411,34 @@ function MainPage() {
                                 <div className="icon new-chat-icon"></div>
                             </div>
                         </div>
-                        {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
-                            console.log(chatItem)
-                            if (chatItem.chatType == ChatType.GROUP)
-                                return <div key={`${chatItem.chatType}-${chatItem.groupId}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
-                                    <UserPicture id={chatItem.groupId} type={chatItem.chatType} />
+                        <div className="chats-space">
+                            {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
+                                console.log(chatItem)
+                                if (chatItem.chatType == ChatType.GROUP)
+                                    return <div key={`${chatItem.chatType}-${chatItem.groupId}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
+                                        <UserPicture id={chatItem.groupId} type={chatItem.chatType} />
+                                        <div className="user-item-data">
+                                            <p>{chatItem.groupId} - {chatItem.username}</p>
+                                            {chatItem.lastMessage != null ?
+                                                <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
+                                                : <p>Group Created</p>
+                                            }
+                                            <p>{new Date(chatItem.updated_at).toISOString()}</p>
+                                        </div>
+                                    </div>
+                                return <div key={`${chatItem.chatType}-${chatItem.id}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
+                                    <UserPicture id={chatItem.id} type={chatItem.chatType} />
                                     <div className="user-item-data">
-                                        <p>{chatItem.groupId} - {chatItem.username}</p>
-                                        {chatItem.lastMessage != null ?
-                                            <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
-                                            : <p>Group Created</p>
-                                        }
+                                        <p>{chatItem.id} - {chatItem.username}</p>
+                                        <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
                                         <p>{new Date(chatItem.updated_at).toISOString()}</p>
                                     </div>
                                 </div>
-                            return <div key={`${chatItem.chatType}-${chatItem.userId}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
-                                <UserPicture id={chatItem.userId} type={chatItem.chatType} />
-                                <div className="user-item-data">
-                                    <p>{chatItem.userId} - {chatItem.username}</p>
-                                    <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
-                                    <p>{new Date(chatItem.updated_at).toISOString()}</p>
-                                </div>
-                            </div>
-                        }) : <p>No users</p>}
-                    </div>) : (
+                            }) : <p>No users</p>}
+                        </div>
+                        {/* <hr className="limit" /> */}
+                    </div>
+                    ) : (
                     <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} createGroup={handleShowCreateGroup} />
                 )}
                 {mainPane}

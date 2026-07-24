@@ -118,6 +118,11 @@ label {
     background-color: rgb(255, 255, 255);
 }
 
+.plus-icon {
+    mask-image: url("../public/plus-icon.png");
+    background-color: rgb(255, 255, 255);
+}
+
 .logout-btn {
     box-sizing: border-box;
     padding-left: 10px;
@@ -130,7 +135,7 @@ label {
     font-size: large;
     width: calc(100% - 20px);
     border-radius: 10px;
-    bottom: 10px;
+    bottom: 6px;
     cursor: pointer;
 
 
@@ -149,12 +154,53 @@ label {
 }
 
 .side-pane {
+    display: flex;
+    flex-direction: column;
     position: relative;
     background-color: var(--primary-color);
     border-right: #3d3d3d solid 1px;
     height: 100%;
     color: white;
     padding: 0 10px;
+    overflow: hidden;
+}
+
+.chats-space {
+    margin-top: 10px;
+    margin-bottom: 55px;
+    /* height: calc(100% - 300px); */
+    overflow-y: scroll;
+    border-bottom: #555 solid 2px;
+
+    --sb-track-color: #000000;
+    --sb-thumb-color: #b7b7b7;
+    --sb-size: 4px;
+}
+
+
+.chats-space .user-item:first-of-type {
+margin-top: 0;
+}
+
+.chats-space::-webkit-scrollbar {
+    width: var(--sb-size)
+}
+
+.chats-space::-webkit-scrollbar-track {
+    background: var(--sb-track-color);
+    border-radius: 3px;
+}
+
+.chats-space::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb-color);
+    border-radius: 3px;
+
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .chats-space {
+        scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+    }
 }
 
 .main-header {
@@ -432,6 +478,7 @@ label {
     gap: 0 10px;
     justify-content: space-between;
     align-items: center;
+
     button {
         background-color: #4a4a4d;
         border: none;
@@ -593,6 +640,7 @@ label {
 .midia {
     width: 10vw;
     height: 4vw;
+    cursor: pointer;
 
     img {
         width: 100%;
@@ -620,6 +668,7 @@ dialog {
     left: 20%;
     transform: translateX(20%);
     margin: 0;
+    background-color: #4a4a4d;
 }
 
 

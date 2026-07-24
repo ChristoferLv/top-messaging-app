@@ -13,6 +13,7 @@ import jwt from 'jsonwebtoken';
 import http from 'http'
 import { Server } from 'socket.io'
 import groupRouter from './routes/groupsRoutes.js';
+import pictureRouter from './routes/midiaRoutes.js';
 
 
 const app = express();
@@ -68,6 +69,7 @@ app.use("/groups", groupRouter);
 app.use("/contacts", friendRouter);
 app.use("/users", userRoutes);
 app.use("/auth", authRouter);
+app.use("/midias", pictureRouter);
 
 app.use("/", (req, res) => res.status(200).send({ message: "Ok" }))
 app.use((err, req, res, next) => {

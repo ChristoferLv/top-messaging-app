@@ -36,7 +36,7 @@ async function checkChatExistsWith(req, res) {
             }
         });
         if (!chat)
-            return res.status(200).send({ success: true, isChat: false, data: { user: user, chat:null } });
+            return res.status(200).send({ success: true, isChat: false, data: { user: user, chat: null } });
         return res.status(200).send({ success: true, isChat: true, data: { user: user, chat: chat } });
     } catch (e) {
         console.log(e);
@@ -52,11 +52,11 @@ async function listMyChats(req, res) {
     const userId = req.user.id;
     try {
         const chats = await prisma.$queryRaw`
-        SELECT "Chats".id as "chatId", updated_at, sender.id as "userId", sender.username, 'NORMAL' as "chatType"
+        SELECT "Chats".id as "chatId", updated_at, sender.id as "id", sender.username, 'NORMAL' as "chatType"
         FROM "Chats"
         INNER JOIN "Users" as sender ON "Chats"."senderId" = ${userId} AND sender.id = "Chats"."recipientId"
         UNION
-        SELECT "Chats".id as "chatId", updated_at, receiver.id as "userId", receiver.username, 'NORMAL' as "chatType"
+        SELECT "Chats".id as "chatId", updated_at, receiver.id as "id", receiver.username, 'NORMAL' as "chatType"
         FROM "Chats"
         INNER JOIN "Users" as receiver ON "Chats"."recipientId" = ${userId} AND receiver.id = "Chats"."senderId"
         
@@ -149,7 +149,7 @@ async function sendFirstMessage(req, res) {
                 result = await tx.messages.create({
                     data: {
                         content: "Midia",
-                        chatsId: chat.id,
+                        chatsId: newChat.id,
                         senderId: userId,
                         type: 'MIDIA'
                     }
@@ -158,7 +158,7 @@ async function sendFirstMessage(req, res) {
                 result = await tx.messages.create({
                     data: {
                         content: message,
-                        chatsId: chat.id,
+                        chatsId: newChat.id,
                         senderId: userId,
                         type: 'TEXT'
                     }
@@ -180,16 +180,23 @@ async function sendFirstMessage(req, res) {
                 )
             }
 
-            const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
+            const user = await prisma.users.findUnique({
+                where: { id: receiverId },
+                omit: { picture: true, password: true }
+            });
+
+            const newChatData = { user:user, chat: newChat }
+            console.log("new chat data", newChatData)
+            const receiver = receiverId;
             console.log("receiver", receiver)
             if (result) {
-                req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
+                req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + newChat.id);
             }
-            if (midiaMessage) {
-                const { reducedFileRef, content } = fileRef;
-                return { ...result, midia: reducedFileRef };
-            }
-            return result;
+            // if (midiaMessage) {
+            //     const { reducedFileRef, content } = fileRef;
+            //     return { ...result, midia: reducedFileRef };
+            // }
+            return newChatData;
 
             // const firstMessage = await tx.messages.create(
             //     {

@@ -61,7 +61,7 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
                     <p>Back</p>
                 </div>
                 <div className="back-btn" onClick={(e) => createGroup()}>
-                    <div className="icon back-icon"></div>
+                    <div className="icon plus-icon"></div>
                     <p>New Group</p>
                 </div>
                 <div className="new-contact">

@@ -39,9 +39,12 @@ async function sendGroupMessage(req, res) {
     const groupId = parseInt(req.params.groupId);
     const userId = req.user.id;
     const message = req.body.message;
+    const midiaMessage = req.file?.size > 0;
     console.log("content", req.body)
 
     try {
+        let fileRef = null;
+        let result = null;
         const sendMessageResult = await prisma.$transaction(async (tx) => {
             const group = await tx.groupChats.findUnique({
                 where: { id: groupId }
@@ -57,15 +60,54 @@ async function sendGroupMessage(req, res) {
                 },
             );
 
-            const messageResult = await tx.groupMessages.create({
-                data: {
-                    content: message,
-                    type: 'TEXT',
-                    groupChatId: groupId,
-                    senderId: userId,
-                }
-            });
-            return messageResult;
+
+            if (midiaMessage) {
+                result = await tx.groupMessages.create({
+                    data: {
+                        content: "Midia",
+                        groupChatId: groupId,
+                        senderId: userId,
+                        type: 'MIDIA',
+                    }
+                });
+            } else {
+                result = await tx.groupMessages.create({
+                    data: {
+                        content: message,
+                        groupChatId: groupId,
+                        senderId: userId,
+                        type: 'TEXT'
+                    }
+                });
+            }
+
+            if (midiaMessage) {
+                const fileData = new Buffer.from(req.file.buffer).toString('base64');
+                const mime = req.file.mimetype;
+
+                fileRef = await tx.groupMidias.create(
+                    {
+                        data: {
+                            content: `${mime}:${fileData}`,
+                            ownerId: userId,
+                            groupMessageId: result.id,
+                            groupId: groupId,
+                        }
+                    }
+                )
+            }
+
+
+            // const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
+            // console.log("receiver", receiver)
+            // if (result) {
+            // req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
+            // }
+            if (midiaMessage) {
+                const { reducedFileRef, content } = fileRef;
+                return { ...result, midia: reducedFileRef };
+            }
+            return result;
         }
         );
         return res.status(201).send({ success: true, data: sendMessageResult });
@@ -74,6 +116,88 @@ async function sendGroupMessage(req, res) {
         res.status(500).send({ success: false });
     }
 }
+
+//  const chatId = parseInt(req.params.chatId);
+//     console.log(req.file)
+//     console.log(req.body)
+//     const midiaMessage = req.file?.size > 0;
+//     try {
+//         let fileRef = null;
+//         let result = null;
+//         const sendMessageResult = await prisma.$transaction(async (tx) => {
+//             const chat = await tx.chats.findUnique({
+//                 where: { id: chatId }
+//             });
+
+//             if (!chat)
+//                 return res.status(300).send({ success: false, message: "Chat not found" });
+
+//             const updateChatResult = await tx.chats.update(
+//                 {
+//                     where: { id: chat.id },
+//                     data: { updated_at: new Date() }
+//                 },
+//             );
+
+//             const message = req.body.message;
+//             const userId = req.user.id;
+
+//             if (midiaMessage) {
+//                 result = await tx.messages.create({
+//                     data: {
+//                         content: "Midia",
+//                         chatsId: chat.id,
+//                         senderId: userId,
+//                         type: 'MIDIA'
+//                     }
+//                 });
+//             } else {
+//                 result = await tx.messages.create({
+//                     data: {
+//                         content: message,
+//                         chatsId: chat.id,
+//                         senderId: userId,
+//                         type: 'TEXT'
+//                     }
+//                 });
+//             }
+
+//             if (midiaMessage) {
+//                 const fileData = new Buffer.from(req.file.buffer).toString('base64');
+//                 const mime = req.file.mimetype;
+
+//                 fileRef = await tx.midias.create(
+//                     {
+//                         data: {
+//                             content: `${mime}:${fileData}`,
+//                             ownerId: userId,
+//                             messageId: result.id,
+//                         }
+//                     }
+//                 )
+//             }
+
+
+//             const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
+//             console.log("receiver", receiver)
+//             if (result) {
+//                 req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
+//             }
+//             if (midiaMessage) {
+//                 const { reducedFileRef, content } = fileRef;
+//                 return { ...result, midia: reducedFileRef };
+//             }
+//             return result;
+//         });
+
+
+
+
+//         res.status(201).send({ success: true, data: sendMessageResult });
+//     } catch (e) {
+//         console.log(e);
+//         res.status(500).send({ success: false });
+//     }
 
 /**
  * @param {import('express').Request} req - The Express request object.
