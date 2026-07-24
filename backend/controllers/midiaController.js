@@ -5,6 +5,10 @@ import { prisma } from '../lib/prisma.js';
  * @param {import('express').Response} res - The Express response object.
  */
 async function getMessageMidia(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+    
     const messageId = parseInt(req.params.messageId);
     const origin = req.params.origin;
     try {

@@ -15,6 +15,10 @@ async function getAllUsers(req, res) {
 }
 
 async function findUserByUsername(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
     const { username } = req.params;
     try {
         const user = await prisma.users.findUnique({
@@ -34,6 +38,10 @@ async function findUserByUsername(req, res) {
 }
 
 async function getUserById(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    };
+
     const userId = parseInt(req.params.userId);
     try {
         const user = await prisma.users.findUnique({
@@ -53,6 +61,9 @@ async function getUserById(req, res) {
 }
 
 async function updateUserProfile(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
     const userId = parseInt(req.user.id);
     const note = req.body.note;
     try {
@@ -77,6 +88,10 @@ async function updateUserProfile(req, res) {
 }
 
 async function getPicture(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
     const userId = parseInt(req.params.userId);
     const result = await prisma.users.findUnique(
         { where: { id: userId }, select: { picture: true } }
@@ -85,7 +100,6 @@ async function getPicture(req, res) {
 }
 
 async function uploadPicture(req, res) {
-    console.log(req.body)
     const userId = req.user.id;
     const content = new Buffer.from(req.file.buffer).toString('base64');
     const mime = req.file.mimetype;

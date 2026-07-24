@@ -43,7 +43,7 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
     }
 
     async function handleAddContact() {
-        const result = await addContact(searchUsername);
+        const result = await addContact(foundContact.id);
         console.log(result)
         if (result.success) {
             const contacts = await loadContacts();

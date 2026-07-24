@@ -179,7 +179,7 @@ label {
 
 
 .chats-space .user-item:first-of-type {
-margin-top: 0;
+    margin-top: -2px;
 }
 
 .chats-space::-webkit-scrollbar {

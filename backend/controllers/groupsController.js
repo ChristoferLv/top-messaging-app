@@ -6,29 +6,50 @@ import { prisma } from '../lib/prisma.js';
  * @param {import('express').Response} res - The Express response object.
  */
 async function createGroup(req, res) {
-    const userId = req.user.id;
-    const groupName = req.body.name;
-    const members = req.body.members;
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
 
-    const treatedMembers = members.map((participant) => {
-        return { userId: participant };
-    })
+    try {
+        const userId = req.user.id;
+        const groupName = req.body.name;
+        const members = req.body.members;
 
-    treatedMembers.push({ userId: userId });
+        const contacts = await prisma.contacts.findMany({
+            where: { contactOwnerId: userId },
+            select: { contactId: true }
+        });
 
-    const result = await prisma.groupChats.create({
-        data: {
-            name: groupName,
-            creatorId: userId,
-            type: 'GROUP',
-            usersGroups: {
-                createMany: {
-                    data: treatedMembers
+        const contactsId = contacts.map((contact) => contact.contactId);
+
+        const allMyContacts = members.every((member) => contactsId.includes(member));
+
+        if (!allMyContacts) {
+            return res.status(400).send({ success: false, message: "Not every member is on your contact list." });
+        }
+
+        const treatedMembers = members.map((participant) => {
+            return { userId: participant };
+        });
+        treatedMembers.push({ userId: userId });
+
+        const result = await prisma.groupChats.create({
+            data: {
+                name: groupName,
+                creatorId: userId,
+                type: 'GROUP',
+                usersGroups: {
+                    createMany: {
+                        data: treatedMembers
+                    }
                 }
             }
-        }
-    })
-    return res.status(201).send({ success: true, data: result });
+        })
+        return res.status(201).send({ success: true, data: result });
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send({ success: false });
+    }
 }
 
 /**
@@ -36,13 +57,24 @@ async function createGroup(req, res) {
  * @param {import('express').Response} res - The Express response object.
  */
 async function sendGroupMessage(req, res) {
-    const groupId = parseInt(req.params.groupId);
-    const userId = req.user.id;
-    const message = req.body.message;
-    const midiaMessage = req.file?.size > 0;
-    console.log("content", req.body)
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
 
     try {
+        const groupId = parseInt(req.params.groupId);
+        const userId = req.user.id;
+        const message = req.body.message;
+        const midiaMessage = req.file?.size > 0;
+
+        const isMember = await prisma.usersGroups.findUnique({
+            where: { userId_groupChatId: { userId: userId, groupChatId: groupId } }
+        })
+
+        if (!isMember) {
+            return res.status(403).send({ success: false, message: "You are not member of this group." });
+        }
+
         let fileRef = null;
         let result = null;
         const sendMessageResult = await prisma.$transaction(async (tx) => {
@@ -117,96 +149,27 @@ async function sendGroupMessage(req, res) {
     }
 }
 
-//  const chatId = parseInt(req.params.chatId);
-//     console.log(req.file)
-//     console.log(req.body)
-//     const midiaMessage = req.file?.size > 0;
-//     try {
-//         let fileRef = null;
-//         let result = null;
-//         const sendMessageResult = await prisma.$transaction(async (tx) => {
-//             const chat = await tx.chats.findUnique({
-//                 where: { id: chatId }
-//             });
-
-//             if (!chat)
-//                 return res.status(300).send({ success: false, message: "Chat not found" });
-
-//             const updateChatResult = await tx.chats.update(
-//                 {
-//                     where: { id: chat.id },
-//                     data: { updated_at: new Date() }
-//                 },
-//             );
-
-//             const message = req.body.message;
-//             const userId = req.user.id;
-
-//             if (midiaMessage) {
-//                 result = await tx.messages.create({
-//                     data: {
-//                         content: "Midia",
-//                         chatsId: chat.id,
-//                         senderId: userId,
-//                         type: 'MIDIA'
-//                     }
-//                 });
-//             } else {
-//                 result = await tx.messages.create({
-//                     data: {
-//                         content: message,
-//                         chatsId: chat.id,
-//                         senderId: userId,
-//                         type: 'TEXT'
-//                     }
-//                 });
-//             }
-
-//             if (midiaMessage) {
-//                 const fileData = new Buffer.from(req.file.buffer).toString('base64');
-//                 const mime = req.file.mimetype;
-
-//                 fileRef = await tx.midias.create(
-//                     {
-//                         data: {
-//                             content: `${mime}:${fileData}`,
-//                             ownerId: userId,
-//                             messageId: result.id,
-//                         }
-//                     }
-//                 )
-//             }
-
-
-//             const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
-//             console.log("receiver", receiver)
-//             if (result) {
-//                 req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
-//             }
-//             if (midiaMessage) {
-//                 const { reducedFileRef, content } = fileRef;
-//                 return { ...result, midia: reducedFileRef };
-//             }
-//             return result;
-//         });
-
-
-
-
-//         res.status(201).send({ success: true, data: sendMessageResult });
-//     } catch (e) {
-//         console.log(e);
-//         res.status(500).send({ success: false });
-//     }
-
 /**
  * @param {import('express').Request} req - The Express request object.
  * @param {import('express').Response} res - The Express response object.
  */
 async function getMessageOfGroup(req, res) {
-    const groupId = parseInt(req.params.groupId);
-    console.log("groupid", groupId)
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
     try {
+        const userId = req.user.id;
+        const groupId = parseInt(req.params.groupId);
+
+        const isMember = await prisma.usersGroups.findUnique({
+            where: { userId_groupChatId: { userId: userId, groupChatId: groupId } }
+        })
+
+        if (!isMember) {
+            return res.status(403).send({ success: false, message: "You are not member of this group." });
+        }
+
         const messages = await prisma.groupMessages.findMany({
             where: { groupChatId: groupId },
             include: {
@@ -216,7 +179,6 @@ async function getMessageOfGroup(req, res) {
             },
             orderBy: { created_at: 'asc' }
         });
-        console.log("group messages", messages)
         res.status(200).send({ success: true, data: messages });
     } catch (e) {
         console.log(e);
@@ -229,8 +191,22 @@ async function getMessageOfGroup(req, res) {
  * @param {import('express').Response} res - The Express response object.
  */
 async function getGroupDetails(req, res) {
-    const groupId = parseInt(req.params.groupId);
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
     try {
+        const userId = req.user.id;
+        const groupId = parseInt(req.params.groupId);
+
+        const isMember = await prisma.usersGroups.findUnique({
+            where: { userId_groupChatId: { userId: userId, groupChatId: groupId } }
+        })
+
+        if (!isMember) {
+            return res.status(403).send({ success: false, message: "You are not member of this group." });
+        }
+
         const details = await prisma.groupChats.findUnique({
             where: { id: groupId },
             include: {
@@ -250,9 +226,15 @@ async function getGroupDetails(req, res) {
  * @param {import('express').Response} res - The Express response object.
  */
 async function removeMemberFromGroup(req, res) {
-    const groupId = parseInt(req.params.groupId);
-    const memberId = parseInt(req.params.memberId);
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
     try {
+        const userId = req.user.id;
+        const groupId = parseInt(req.params.groupId);
+        const memberId = parseInt(req.params.memberId);
+
         const group = await prisma.groupChats.findUnique({
             where: { id: groupId },
             include: {
@@ -260,17 +242,34 @@ async function removeMemberFromGroup(req, res) {
             },
         });
 
-        const relationToRemove = group.usersGroups.filter((relation) => relation.userId == memberId);
+        if (!group) {
+            return res.status(400).send({ success: false, message: "Group not found." });
+        }
 
-        if (relationToRemove[0].id == group.creatorId) {
+        if (group.creatorId != userId) {
+            return res.status(400).send({ success: false, message: "You do now own this group." });
+        }
+
+        if (memberId == group.creatorId) {
             return res.status(400).send({ success: false, message: "Cannot remove group creator." });
         }
 
-        const resultRemove = await prisma.usersGroups.delete({
-            where: { id: relationToRemove[0].id }
+        const isMember = await prisma.usersGroups.findUnique({
+            where: {
+                userId_groupChatId: {
+                    userId: memberId,
+                    groupChatId: groupId
+                }
+            }
         });
 
-        console.log("result", resultRemove)
+        if (!isMember) {
+            return res.status(400).send({ success: false, message: "This user is not member of this group." });
+        }
+
+        const resultRemove = await prisma.usersGroups.delete({
+            where: { userId_groupChatId: { userId: memberId, groupChatId: groupId } }
+        });
 
         if (resultRemove) {
             return res.status(200).send({ success: true });
@@ -284,15 +283,23 @@ async function removeMemberFromGroup(req, res) {
 }
 
 async function editGroup(req, res) {
-    const groupId = parseInt(req.params.groupId);
-    const userId = req.user.id;
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
     try {
+        const groupId = parseInt(req.params.groupId);
+        const userId = req.user.id;
         const group = await prisma.groupChats.findUnique({
             where: { id: groupId },
         });
 
         if (!group)
             return res.status(400).send({ success: false, message: "Group not found" });
+
+        if (group.creatorId != userId) {
+            return res.status(400).send({ success: false, message: "You do now own this group." });
+        }
 
         const result = await prisma.groupChats.update({
             where: { id: groupId },
@@ -318,9 +325,13 @@ async function editGroup(req, res) {
  * @param {import('express').Response} res - The Express response object.
  */
 async function addMemberToGroup(req, res) {
-    const groupId = parseInt(req.params.groupId);
-    const memberId = parseInt(req.params.memberId);
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
     try {
+        const groupId = parseInt(req.params.groupId);
+        const memberId = parseInt(req.params.memberId);
         const group = await prisma.groupChats.findUnique({
             where: { id: groupId },
             include: {
@@ -330,6 +341,10 @@ async function addMemberToGroup(req, res) {
 
         if (!group) {
             return res.status(400).send({ success: false, message: "Group not Found" });
+        }
+
+        if (group.creatorId != userId) {
+            return res.status(400).send({ success: false, message: "You do now own this group." });
         }
 
         const user = await prisma.users.findUnique({

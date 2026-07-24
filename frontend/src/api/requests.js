@@ -452,7 +452,7 @@ async function getMyContacts() {
     }
 }
 
-async function addContact(contactUsername) {
+async function addContact(contactId) {
     try {
         const token = localStorage.getItem("token");
         const request = await fetch("http://localhost:3000/contacts", {
@@ -462,7 +462,7 @@ async function addContact(contactUsername) {
                 'Content-Type': 'application/json',
                 'Authorization': token
             },
-            body: JSON.stringify({ username: contactUsername })
+            body: JSON.stringify({ id: contactId })
         });
         if (request.ok) {
             const contact = await request.json();

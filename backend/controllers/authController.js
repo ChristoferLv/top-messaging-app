@@ -24,7 +24,6 @@ const validateNewUser = [
 ];
 
 async function checkToken(req, res) {
-    console.log(req.headers)
     try {
         jwt.verify(req.headers.authorization.split(" ")[1], process.env.JWT_SECRET);
         return res.status(200).send({ success: true, valid: true });
@@ -37,10 +36,13 @@ async function checkToken(req, res) {
 }
 
 async function getMe(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
     try {
         const result = await prisma.users.findUnique({ where: { id: req.user.id }, omit: { password: true, picture: true } });
 
-        console.log(result)
         if (req.user)
             return res.status(200).json({ success: true, data: result });
         return res.status(400).json({ success: false, data: undefined });
@@ -77,24 +79,28 @@ async function login(req, res) {
 const register = [
     validateNewUser,
     async (req, res) => {
-        console.log("register")
-        const errors = validationResult(req);
-        if (errors.array().length == 1 && errors.array()[0].msg == 'Username is already in use')
-            return res.status(409).json({ success: false, error: errors });
+        try {
+            const errors = validationResult(req);
+            if (errors.array().length == 1 && errors.array()[0].msg == 'Username is already in use')
+                return res.status(409).json({ success: false, error: errors });
 
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, error: errors });
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ success: false, error: errors });
+            }
+
+            const { username, password } = matchedData(req);
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            const result = await prisma.users.create({ data: { password: hashedPassword, username: username } });
+
+            res.status(201).json({
+                data: result,
+                success: true,
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).send({ success: false });
         }
-
-        const { username, password } = matchedData(req);
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const result = await prisma.users.create({ data: { password: hashedPassword, username: username } });
-
-        res.status(201).json({
-            data: result,
-            success: true,
-        });
     }
 ]
 
