@@ -854,7 +854,8 @@ dialog {
 }
 
 .profile-date {
-    margin-top: 10px;
+    margin-top: auto;
+    margin-bottom: 25px;
     text-align: center;
 }
 
@@ -911,4 +912,14 @@ dialog {
 
 .loading {
     color: white;
+}
+
+.hidden{
+    display: none;
+}
+
+.error{
+    color: red;
+    margin-top: 10px;
+    margin-bottom: 0px;
 }

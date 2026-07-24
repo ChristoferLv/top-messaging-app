@@ -1,4 +1,11 @@
+import { body, matchedData, validationResult } from "express-validator";
 import { prisma } from "../lib/prisma.js";
+
+const validateNote = [
+    body("note")
+        .trim()
+        .isLength({ max: 200 }).withMessage("The maximum length for notes is 200 characters.")
+];
 
 async function getAllUsers(req, res) {
     try {
@@ -60,32 +67,70 @@ async function getUserById(req, res) {
     }
 }
 
-async function updateUserProfile(req, res) {
-    if (!req.user) {
-        return res.status(401).send({ success: false });
-    }
-    const userId = parseInt(req.user.id);
-    const note = req.body.note;
-    try {
-        const user = await prisma.users.findUnique({
-            where: { id: userId },
-        });
+const updateUserProfile = [
+    validateNote,
+    async (req, res) => {
+        const errors = validationResult(req);
 
-        if (!user) {
-            return res.status(400).send({ success: false });
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ success: false, error: errors });
         }
 
-        const result = await prisma.users.update({
-            where: { id: userId },
-            data: { note: note },
-            omit: { password: true, picture: true }
-        })
+        if (!req.user) {
+            return res.status(401).send({ success: false });
+        }
 
-        return res.status(200).send({ success: true, data: result });
-    } catch (e) {
-        console.log(e);
+        const note = matchedData(req).note;
+        const userId = parseInt(req.user.id);
+
+        try {
+            const user = await prisma.users.findUnique({
+                where: { id: userId },
+            });
+
+            if (!user) {
+                return res.status(400).send({ success: false });
+            }
+
+            const result = await prisma.users.update({
+                where: { id: userId },
+                data: { note: note },
+                omit: { password: true, picture: true }
+            })
+
+            return res.status(200).send({ success: true, data: result });
+        } catch (e) {
+            console.log(e);
+        }
     }
-}
+]
+
+// async function updateUserProfile(req, res) {
+//     if (!req.user) {
+//         return res.status(401).send({ success: false });
+//     }
+//     const userId = parseInt(req.user.id);
+//     const note = req.body.note;
+//     try {
+//         const user = await prisma.users.findUnique({
+//             where: { id: userId },
+//         });
+
+//         if (!user) {
+//             return res.status(400).send({ success: false });
+//         }
+
+//         const result = await prisma.users.update({
+//             where: { id: userId },
+//             data: { note: note },
+//             omit: { password: true, picture: true }
+//         })
+
+//         return res.status(200).send({ success: true, data: result });
+//     } catch (e) {
+//         console.log(e);
+//     }
+// }
 
 async function getPicture(req, res) {
     if (!req.user) {
@@ -100,16 +145,30 @@ async function getPicture(req, res) {
 }
 
 async function uploadPicture(req, res) {
-    const userId = req.user.id;
-    const content = new Buffer.from(req.file.buffer).toString('base64');
-    const mime = req.file.mimetype;
-    const result = await prisma.users.update(
-        {
-            data: { picture: `${mime}:${content}` },
-            where: { id: userId }
+    try {
+
+        const userId = req.user.id;
+        const content = new Buffer.from(req.file.buffer).toString('base64');
+        const mime = req.file.mimetype;
+
+        if (!mime.startsWith("image/"))
+            return res.status(400).send({ success: false, message: "Invalid file type." });
+
+        if (req.file.size > 5000000) {
+            return res.status(400).send({ success: false, message: "Maximum picture file size is 5MB." });
         }
-    );
-    return res.status(201).send({ success: true, data: result.picture });
+
+        const result = await prisma.users.update(
+            {
+                data: { picture: `${mime}:${content}` },
+                where: { id: userId }
+            }
+        );
+        return res.status(201).send({ success: true, data: result.picture });
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send({ success: false });
+    }
 }
 
 

@@ -2,10 +2,11 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../AuthContext";
 import { fetchPicture, findUserById, sendPicture, updateProfile } from "../api/requests";
 
-function ProfilePage({ userId, close}) {
+function ProfilePage({ userId, close }) {
     const { user, isLoading } = useContext(AuthContext);
     const [profile, setProfile] = useState(null);
     const fileInputRef = useRef(null);
+    const errorMessage = useRef(null);
     const [pictureB64, setPicture] = useState(null);
     const [mime, picture] = pictureB64 ? pictureB64.split(":") : [null, null];
     const [isEditing, setIsEditing] = useState(false);
@@ -42,9 +43,14 @@ function ProfilePage({ userId, close}) {
     async function handlePictureSubmit(e) {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
-        console.log(data)
+        fileInputRef.current.value = "";
+        if (data.picture.size > 5000000) {
+            alert("Maximum picture file size is 5MB.");
+            return;
+        }
+
         const result = await sendPicture(data);
-        if (result) {
+        if (result.success) {
             setPicture(result.data);
         }
     }
@@ -56,6 +62,14 @@ function ProfilePage({ userId, close}) {
 
     function handleChange(e) {
         const whoChanged = event.target;
+        if (whoChanged.name == "note") {
+            if (whoChanged.value.length > 200) {
+                errorMessage.current.classList.remove("hidden")
+                return;
+            } else {
+                errorMessage.current.classList.add("hidden")
+            }
+        }
         const newValues = { ...editedProfile, [whoChanged.name]: whoChanged.value }
         setEditedProfile(newValues);
     }
@@ -98,7 +112,10 @@ function ProfilePage({ userId, close}) {
                 </div>
                 <p className="profile-username">{profile.username}</p>
                 {isEditing ? (
-                    <input className="profile-note-input" type="text" name="note" value={editedProfile.note} onChange={(e) => handleChange(e)} />
+                    <>
+                        <input className="profile-note-input" type="text" name="note" value={editedProfile.note} onChange={(e) => handleChange(e)} />
+                        <p ref={errorMessage} className="hidden error">Maximum note length is 200 characters</p>
+                    </>
                 )
                     : (
                         <>

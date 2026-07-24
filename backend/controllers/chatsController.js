@@ -4,8 +4,16 @@ import { prisma } from '../lib/prisma.js';
 const validateMessage = [
     body("message")
         .trim()
-        .isLength({ min: 1 }).withMessage("Minimum message length is 1 character.")
+        .custom((value, { req }) => {
+            if (req.file && req.file.size > 5000000) {
+                throw new Error("Maximum file size if 5MB.");
+            }
+            if (!req.file && value.length < 1)
+                throw new Error("Minimum message length is 1 character.");
+            return true;
+        })
         .isLength({ max: 20000 }).withMessage("The maximum message length is 20000 characters.")
+        // .isLength({ min: 1 }).withMessage("Minimum message length is 1 character.")
 ];
 
 
@@ -145,6 +153,10 @@ const sendFirstMessage = [
         const message = matchedData(req).message;
         let fileRef = null;
         let result = null;
+
+        if (midiaMessage && req.file.size > 5000000) {
+            return res.status(400).send({ success: false, message: "Maximum midia size is 5MB." });
+        }
 
         try {
             const friend = await prisma.contacts.findUnique({
@@ -363,6 +375,8 @@ const sendMessage = [
             return res.status(401).send({ success: false });
         }
 
+        // console.log("body", req.file)
+
         const errors = validationResult(req);
         console.log("errors", errors)
         if (!errors.isEmpty()) {
@@ -374,6 +388,9 @@ const sendMessage = [
         const userId = req.user.id;
         const message = matchedData(req).message;
 
+        if (midiaMessage && req.file.size > 5000000) {
+            return res.status(400).send({ success: false, message: "Maximum midia size is 5MB." });
+        }
 
         try {
             const chat = await prisma.chats.findUnique({

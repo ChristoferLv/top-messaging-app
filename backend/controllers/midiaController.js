@@ -22,7 +22,7 @@ async function getMessageMidia(req, res) {
                     success: false,
                 });
 
-            res.status(200).send({ success: true, data: content });
+            return res.status(200).send({ success: true, data: content });
         } else {
             const content = await prisma.midias.findUnique({
                 where: { messageId: messageId },

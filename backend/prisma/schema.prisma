@@ -21,7 +21,7 @@ model Users {
   id              Int             @id @default(autoincrement())
   username        String          @unique @db.VarChar(30)
   password        String
-  note            String?
+  note            String?         @db.VarChar(120)
   picture         String?
   created_at      DateTime        @default(now()) @db.Timestamptz(6)
   chatAsSender    Chats[]         @relation("ChatAsSender")
@@ -83,7 +83,7 @@ model Midias {
 model GroupChats {
   id            Int             @id @default(autoincrement())
   name          String          @db.VarChar(40)
-  description   String?
+  description   String?         @db.VarChar(250)
   creatorId     Int
   creator       Users           @relation(fields: [creatorId], references: [id])
   type          ChatType        @default(GROUP)

@@ -190,8 +190,16 @@ function MainPage() {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
         console.log(data)
-
         fileInputRef.current.value = "";
+        if (data.midia.size > 5000000) {
+            alert("Maximum midia size is 5MB.");
+            return;
+        }
+
+        if(data.message.length < 1){
+            return;
+        }
+
         if (chat?.chatType == "GROUP") {
             const result = await sendGroupMessage(chat.groupId, data);
             if (result) {
@@ -241,6 +249,11 @@ function MainPage() {
     }
 
     function handleTypingMessage(e) {
+        console.log("typing", e.target.value)
+        if (e.target.value.length > 20000) {
+            alert("Maximum message length is 20000 characters.")
+            return;
+        }
         setTypingMessage(e.target.value);
     }
 
@@ -303,7 +316,7 @@ function MainPage() {
     if (seeGroup != -1) {
         mainPane = <GroupDetailsPage groupId={seeGroup} close={closeGroupDetails} refetchChats={fetchChats} />
     } else if (createGroup) {
-        mainPane = <NewGroupPage close={handleShowCreateGroup} refetchChats={fetchChats}/>
+        mainPane = <NewGroupPage close={handleShowCreateGroup} refetchChats={fetchChats} />
     }
     else if (showProfile != -1) {
         mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} />
@@ -438,7 +451,7 @@ function MainPage() {
                         </div>
                         {/* <hr className="limit" /> */}
                     </div>
-                    ) : (
+                ) : (
                     <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} createGroup={handleShowCreateGroup} />
                 )}
                 {mainPane}
