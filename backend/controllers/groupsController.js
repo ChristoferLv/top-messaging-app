@@ -405,6 +405,106 @@ async function addMemberToGroup(req, res) {
     }
 }
 
+/**
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ */
+async function leaveGroup(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
+    try {
+        const groupId = parseInt(req.params.groupId);
+        const userId = req.user.id
+
+        const group = await prisma.groupChats.findUnique({
+            where: { id: groupId },
+        });
+
+        if (!group) {
+            return res.status(400).send({ success: false, message: "Group not Found" });
+        }
+
+        if (group.creatorId == userId) {
+            return res.status(400).send({ success: false, message: "The owner cannot leave the group." });
+        }
+
+        const inGroup = await prisma.usersGroups.findUnique({
+            where: {
+                userId_groupChatId: {
+                    userId: userId,
+                    groupChatId: groupId
+                }
+            }
+        });
+
+        if (!inGroup) {
+            return res.status(400).send({ success: false, message: "You are not in this group." });
+        }
+
+        const result = await prisma.usersGroups.delete({
+            where: {
+                userId_groupChatId: {
+                    userId: userId,
+                    groupChatId: groupId
+                }
+            }
+        });
+
+        if (result) {
+            return res.status(200).send({ success: true });
+        }
+        return res.status(500).send({ success: false });
+
+    } catch (e) {
+        console.log(e);
+        res.status(500).send({ success: false });
+    }
+}
+
+/**
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ */
+async function deleteGroup(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
+    try {
+        const groupId = parseInt(req.params.groupId);
+        const userId = req.user.id
+
+        const group = await prisma.groupChats.findUnique({
+            where: { id: groupId },
+        });
+
+        if (!group) {
+            return res.status(400).send({ success: false, message: "Group not Found" });
+        }
+
+        if (group.creatorId != userId) {
+            return res.status(400).send({ success: false, message: "You are not the group owner." });
+        }
+
+        const result = await prisma.groupChats.delete({
+            where: {
+                id: groupId
+            }
+        });
+
+        if (result) {
+            return res.status(200).send({ success: true });
+        }
+        return res.status(500).send({ success: false });
+
+    } catch (e) {
+        console.log(e);
+        res.status(500).send({ success: false });
+    }
+}
+
 
 export {
     createGroup,
@@ -413,5 +513,7 @@ export {
     getGroupDetails,
     removeMemberFromGroup,
     addMemberToGroup,
-    editGroup
+    editGroup,
+    leaveGroup,
+    deleteGroup
 }

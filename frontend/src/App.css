@@ -923,3 +923,65 @@ dialog {
     margin-top: 5px;
     margin-bottom: 0px;
 }
+
+
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+
+.confirm-dialog {
+    background-color: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-title {
+    margin-top: 0;
+    font-size: 22px;
+}
+
+.dialog-message {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+}
+
+.dialog-cancel {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #fff;
+    font-size: 14px;
+}
+
+.dialog-confirm {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #d32d27;
+    color: #fff;
+    font-size: 14px;
+
+}

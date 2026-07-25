@@ -360,6 +360,48 @@ async function editGroup(groupId, data) {
     }
 }
 
+async function leaveGroup(groupId) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}/leave`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const messages = await request.json();
+            return messages;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function deleteGroup(groupId) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const messages = await request.json();
+            return messages;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 
 
 
@@ -559,6 +601,8 @@ export {
     removeMemberFromGroup,
     addMemberToGroup,
     editGroup,
+    leaveGroup,
+    deleteGroup,
     addContact,
     getMyContacts,
     findUserWithUsername,

@@ -37,9 +37,9 @@ model Users {
 }
 
 model Contacts {
-  contactOwner   Users @relation("contactOwner", fields: [contactOwnerId], references: [id])
+  contactOwner   Users @relation("contactOwner", fields: [contactOwnerId], references: [id], onDelete: Cascade)
   contactOwnerId Int
-  contact        Users @relation("contacOf", fields: [contactId], references: [id])
+  contact        Users @relation("contacOf", fields: [contactId], references: [id], onDelete: Cascade)
   contactId      Int
 
   @@id([contactOwnerId, contactId])
@@ -51,9 +51,9 @@ model Chats {
   created_at  DateTime   @default(now()) @db.Timestamptz(6)
   updated_at  DateTime   @default(now()) @db.Timestamptz(6)
   senderId    Int
-  sender      Users      @relation(name: "ChatAsSender", fields: [senderId], references: [id])
+  sender      Users      @relation(name: "ChatAsSender", fields: [senderId], references: [id], onDelete: Cascade)
   recipientId Int
-  recipient   Users      @relation(name: "ChatAsRecipient", fields: [recipientId], references: [id])
+  recipient   Users      @relation(name: "ChatAsRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
   messages    Messages[]
 
   @@unique([senderId, recipientId])
@@ -85,7 +85,7 @@ model GroupChats {
   name          String          @db.VarChar(40)
   description   String?         @db.VarChar(250)
   creatorId     Int
-  creator       Users           @relation(fields: [creatorId], references: [id])
+  creator       Users           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   type          ChatType        @default(GROUP)
   created_at    DateTime        @default(now()) @db.Timestamptz(6)
   updated_at    DateTime        @default(now()) @db.Timestamptz(6)
@@ -97,9 +97,9 @@ model GroupChats {
 model UsersGroups {
   id          Int        @id @default(autoincrement())
   userId      Int
-  user        Users      @relation(fields: [userId], references: [id])
+  user        Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
   groupChatId Int
-  group       GroupChats @relation(fields: [groupChatId], references: [id])
+  group       GroupChats @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
 
   @@unique([userId, groupChatId])
 }
@@ -110,9 +110,9 @@ model GroupMessages {
   content     String       @db.VarChar(1000)
   created_at  DateTime     @default(now()) @db.Timestamptz(6)
   senderId    Int
-  sender      Users        @relation(fields: [senderId], references: [id])
+  sender      Users        @relation(fields: [senderId], references: [id], onDelete: Cascade)
   groupChatId Int
-  chat        GroupChats   @relation(fields: [groupChatId], references: [id])
+  chat        GroupChats   @relation(fields: [groupChatId], references: [id], onDelete: Cascade)
   groupMidias GroupMidias?
 }
 
@@ -120,11 +120,11 @@ model GroupMidias {
   id             Int           @id @default(autoincrement())
   content        String        @db.Text
   ownerId        Int
-  owner          Users         @relation(fields: [ownerId], references: [id])
+  owner          Users         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   groupMessageId Int           @unique
-  groupMessages  GroupMessages @relation(fields: [groupMessageId], references: [id])
+  groupMessages  GroupMessages @relation(fields: [groupMessageId], references: [id], onDelete: Cascade)
   groupId        Int
-  group          GroupChats    @relation(fields: [groupId], references: [id])
+  group          GroupChats    @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 
 // model Order {

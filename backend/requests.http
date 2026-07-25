@@ -1,4 +1,4 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4NDkxNzI3NCwiZXhwIjoxNzg1MDAzNjc0fQ.NFNUh9jCoRTtXUPgKVnS9JiRJ-2vfJmJ-fh_JQpozFo
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4NTAwNjI3MSwiZXhwIjoxNzg1MDkyNjcxfQ.ZwKK0c0Uc50csrABp9008lCIjyi49th8TMIvbSYrED8
 
 GET http://localhost:3000/auth/check
 content-type: application/json
@@ -140,13 +140,19 @@ Authorization: {{token}}
 
 ###
 
-DELETE  http://localhost:3000/groups/6/members/3
+DELETE  http://localhost:3000/groups/6/members/2
 content-type: application/json
 Authorization: {{token}}
 
 ###
 
 POST  http://localhost:3000/groups/5/members/3
+content-type: application/json
+Authorization: {{token}}
+
+###
+
+DELETE http://localhost:3000/groups/5/
 content-type: application/json
 Authorization: {{token}}
 

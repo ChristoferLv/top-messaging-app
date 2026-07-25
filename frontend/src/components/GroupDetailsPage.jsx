@@ -1,10 +1,11 @@
 import { use, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { addMemberToGroup, createGroup, editGroup, fetchGroupDetails, getMyContacts, removeMemberFromGroup } from "../api/requests";
+import { addMemberToGroup, createGroup, deleteGroup, editGroup, fetchGroupDetails, getMyContacts, leaveGroup, removeMemberFromGroup } from "../api/requests";
 import { ChatType } from "../defaults";
 import UserPicture from "./UserPicture";
 import { AuthContext } from "../AuthContext";
+import ConfirmationDialog from "./ConfirmationDialog";
 
-function GroupDetailsPage({ groupId, close, refetchChats }) {
+function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
     const { user, isLoading } = useContext(AuthContext);
     const [groupData, setgroupData] = useState(null);
     const [myContacts, setMyContacts] = useState([]);
@@ -13,6 +14,8 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
     const [editedGroupData, setEditedGroupData] = useState(null);
     const groupNameError = useRef(null);
     const groupDescriptionError = useRef(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
 
 
     const fetchGroupData = useCallback(async () => {
@@ -96,6 +99,31 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
         setRemovingMembers(c => !c);
     }
 
+    async function handleLeaveGroup() {
+        const result = await leaveGroup(groupData.id);
+        if (result.success) {
+            close();
+           handleDelete();
+        }
+    }
+
+    async function handleDeleteGroup() {
+        setIsDialogOpen(true);
+
+    }
+
+    const handleConfirmAction = async () => {
+        const result = await deleteGroup(groupData.id);
+        if (result.success) {
+            close();
+            handleDelete();
+        }
+    };
+
+    const handleCancelAction = () => {
+        setIsDialogOpen(false);
+    };
+
     if (!groupData || !myContacts) return (<><div className="new-group-page"><p className="loading">Loading...</p></div></>)
 
     const isOwner = groupData.creatorId == user.id;
@@ -110,6 +138,8 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
                 <p className="create-group-title">Group Details</p>
                 <button onClick={close}>&larr; Back</button>
                 {isOwner ? <button onClick={handleEdit}>{isEditing ? "Cancel Edit" : "Edit"}</button> : null}
+                {!isOwner ? <button onClick={handleEdit}>Leave group</button> : null}
+                {isOwner ? <button onClick={handleDeleteGroup}>Delete group</button> : null}
             </div>
             <div className="new-group-controls">
                 {isEditing ? (
@@ -164,6 +194,13 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
 
             </div>
         </div>
+        <ConfirmationDialog
+            isOpen={isDialogOpen}
+            title="Delete group permanently?"
+            message="Are you absolutely sure you want to delete your this group? This action can't be reverted."
+            onConfirm={handleConfirmAction}
+            onCancel={handleCancelAction}
+        />
     </>)
 }
 

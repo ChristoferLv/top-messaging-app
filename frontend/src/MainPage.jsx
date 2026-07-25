@@ -310,11 +310,17 @@ function MainPage() {
         setSeeGroup(-1);
     }
 
+    function groupDeletion(){
+        console.log("delete group")
+        fetchChats();
+        setChat(null);
+    }
+
 
     let mainPane = <NoChatHolder />;
 
     if (seeGroup != -1) {
-        mainPane = <GroupDetailsPage groupId={seeGroup} close={closeGroupDetails} refetchChats={fetchChats} />
+        mainPane = <GroupDetailsPage groupId={seeGroup} close={closeGroupDetails} refetchChats={fetchChats} handleDelete={groupDeletion} />
     } else if (createGroup) {
         mainPane = <NewGroupPage close={handleShowCreateGroup} refetchChats={fetchChats} />
     }
