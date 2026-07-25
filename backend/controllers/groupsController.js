@@ -1,56 +1,75 @@
 import { prisma } from '../lib/prisma.js';
+import { body, matchedData, validationResult } from 'express-validator';
 
 
-/**
- * @param {import('express').Request} req - The Express request object.
- * @param {import('express').Response} res - The Express response object.
- */
-async function createGroup(req, res) {
-    if (!req.user) {
-        return res.status(401).send({ success: false });
-    }
+const validateGroup = [
+    body("name")
+        .trim()
+        .isLength({ min: 1 }).withMessage("The minimum group name length is 1 character.")
+        .isLength({ max: 40 }).withMessage("The maximum message length is 40 characters."),
+    body("description")
+        .trim()
+        .isLength({ max: 250 }).withMessage("The maximum group description length is 250 characters."),
 
-    try {
-        const userId = req.user.id;
-        const groupName = req.body.name;
-        const members = req.body.members;
+];
 
-        const contacts = await prisma.contacts.findMany({
-            where: { contactOwnerId: userId },
-            select: { contactId: true }
-        });
 
-        const contactsId = contacts.map((contact) => contact.contactId);
-
-        const allMyContacts = members.every((member) => contactsId.includes(member));
-
-        if (!allMyContacts) {
-            return res.status(400).send({ success: false, message: "Not every member is on your contact list." });
+const createGroup = [
+    validateGroup,
+    async (req, res) => {
+        if (!req.user) {
+            return res.status(401).send({ success: false });
         }
 
-        const treatedMembers = members.map((participant) => {
-            return { userId: participant };
-        });
-        treatedMembers.push({ userId: userId });
+        const errors = validationResult(req);
 
-        const result = await prisma.groupChats.create({
-            data: {
-                name: groupName,
-                creatorId: userId,
-                type: 'GROUP',
-                usersGroups: {
-                    createMany: {
-                        data: treatedMembers
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ success: false, error: errors });
+        }
+
+        try {
+            const userId = req.user.id;
+            const { name, description } = matchedData(req);
+            const members = req.body.members;
+
+            const contacts = await prisma.contacts.findMany({
+                where: { contactOwnerId: userId },
+                select: { contactId: true }
+            });
+
+            const contactsId = contacts.map((contact) => contact.contactId);
+
+            const allMyContacts = members.every((member) => contactsId.includes(member));
+
+            if (!allMyContacts) {
+                return res.status(400).send({ success: false, message: "Not every member is on your contact list." });
+            }
+
+            const treatedMembers = members.map((participant) => {
+                return { userId: participant };
+            });
+            treatedMembers.push({ userId: userId });
+
+            const result = await prisma.groupChats.create({
+                data: {
+                    name: name,
+                    description: description,
+                    creatorId: userId,
+                    type: 'GROUP',
+                    usersGroups: {
+                        createMany: {
+                            data: treatedMembers
+                        }
                     }
                 }
-            }
-        })
-        return res.status(201).send({ success: true, data: result });
-    } catch (e) {
-        console.log(e);
-        return res.status(500).send({ success: false });
+            })
+            return res.status(201).send({ success: true, data: result });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).send({ success: false });
+        }
     }
-}
+];
 
 /**
  * @param {import('express').Request} req - The Express request object.
@@ -282,43 +301,56 @@ async function removeMemberFromGroup(req, res) {
     }
 }
 
-async function editGroup(req, res) {
-    if (!req.user) {
-        return res.status(401).send({ success: false });
-    }
 
-    try {
-        const groupId = parseInt(req.params.groupId);
-        const userId = req.user.id;
-        const group = await prisma.groupChats.findUnique({
-            where: { id: groupId },
-        });
-
-        if (!group)
-            return res.status(400).send({ success: false, message: "Group not found" });
-
-        if (group.creatorId != userId) {
-            return res.status(400).send({ success: false, message: "You do now own this group." });
+const editGroup = [
+    validateGroup,
+    async (req, res) => {
+        if (!req.user) {
+            return res.status(401).send({ success: false });
         }
 
-        const result = await prisma.groupChats.update({
-            where: { id: groupId },
-            data: {
-                description: req.body.description,
-                name: req.body.name
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ success: false, error: errors });
+        }
+
+        try {
+            const groupId = parseInt(req.params.groupId);
+            const userId = req.user.id;
+            const group = await prisma.groupChats.findUnique({
+                where: { id: groupId },
+            });
+
+            if (!group)
+                return res.status(400).send({ success: false, message: "Group not found" });
+
+            if (group.creatorId != userId) {
+                return res.status(400).send({ success: false, message: "You do now own this group." });
             }
-        })
 
-        if (result) {
-            return res.status(200).send({ success: true });
+            const { name, description } = matchedData(req);
+
+            const result = await prisma.groupChats.update({
+                where: { id: groupId },
+                data: {
+                    name: name,
+                    description: description
+                }
+            })
+
+            if (result) {
+                return res.status(200).send({ success: true });
+            }
+            return res.status(500).send({ success: false });
+
+        } catch (e) {
+            console.log(e);
+            res.status(500).send({ success: false });
         }
-        return res.status(500).send({ success: false });
 
-    } catch (e) {
-        console.log(e);
-        res.status(500).send({ success: false });
     }
-}
+];
 
 /**
  * @param {import('express').Request} req - The Express request object.

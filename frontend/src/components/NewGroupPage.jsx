@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createGroup, getMyContacts } from "../api/requests";
 import { ChatType } from "../defaults";
 import UserPicture from "./UserPicture";
 
-function NewGroupPage({close, refetchChats}) {
+function NewGroupPage({ close, refetchChats }) {
     const [myContacts, setMyContacts] = useState([]);
     const [groupData, setgroupData] = useState({ name: "", description: "", members: [] });
+    const groupNameError = useRef(null);
+    const groupDescriptionError = useRef(null);
 
     useEffect(() => {
         async function getContacts() {
@@ -22,6 +24,23 @@ function NewGroupPage({close, refetchChats}) {
 
     async function handleChange(e) {
         const whoChanged = event.target;
+        if (whoChanged.name == "name") {
+            if (whoChanged.value.length > 40) {
+                groupNameError.current.classList.remove("hidden");
+                return;
+            } else {
+                groupNameError.current.classList.add("hidden");
+            }
+        }
+
+        if (whoChanged.name == "description") {
+            if (whoChanged.value.length > 250) {
+                groupDescriptionError.current.classList.remove("hidden");
+                return;
+            } else {
+                groupDescriptionError.current.classList.add("hidden");
+            }
+        }
         const newValues = { ...groupData, [whoChanged.name]: whoChanged.value }
         setgroupData(newValues);
     }
@@ -51,8 +70,10 @@ function NewGroupPage({close, refetchChats}) {
             <div className="new-group-controls">
                 <label htmlFor="name">Group name*</label>
                 <input id="name" type="text" name="name" value={groupData.name} onChange={(e) => handleChange(e)} />
+                <p className="error hidden" ref={groupNameError}>Group name length must be between 1 and 40 characters.</p>
                 <label htmlFor="description">Description</label>
                 <input id="description" type="text" name="description" value={groupData.description} onChange={(e) => handleChange(e)} />
+                <p className="error hidden" ref={groupDescriptionError}>Group description maximum length is 250 characters.</p>
                 <button className="create-group-btn" onClick={handleCreateGroup}>Create</button>
                 <p className="members-selection">Members selection</p>
                 {myContacts.length > 0 ? myContacts.map((contact) => {

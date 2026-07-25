@@ -1,4 +1,4 @@
-import { use, useCallback, useContext, useEffect, useState } from "react";
+import { use, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { addMemberToGroup, createGroup, editGroup, fetchGroupDetails, getMyContacts, removeMemberFromGroup } from "../api/requests";
 import { ChatType } from "../defaults";
 import UserPicture from "./UserPicture";
@@ -11,6 +11,8 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
     const [removingMembers, setRemovingMembers] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [editedGroupData, setEditedGroupData] = useState(null);
+    const groupNameError = useRef(null);
+    const groupDescriptionError = useRef(null);
 
 
     const fetchGroupData = useCallback(async () => {
@@ -41,6 +43,23 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
 
     function handleChange(e) {
         const whoChanged = event.target;
+        if (whoChanged.name == "name") {
+            if (whoChanged.value.length > 40) {
+                groupNameError.current.classList.remove("hidden");
+                return;
+            } else {
+                groupNameError.current.classList.add("hidden");
+            }
+        }
+
+        if (whoChanged.name == "description") {
+            if (whoChanged.value.length > 250) {
+                groupDescriptionError.current.classList.remove("hidden");
+                return;
+            } else {
+                groupDescriptionError.current.classList.add("hidden");
+            }
+        }
         const newValues = { ...editedGroupData, [whoChanged.name]: whoChanged.value }
         setEditedGroupData(newValues);
     }
@@ -97,8 +116,10 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
                     <>
                         <label htmlFor="name">Group name</label>
                         <input id="name" type="text" name="name" value={editedGroupData.name} onChange={(e) => handleChange(e)} />
+                        <p className="error hidden" ref={groupNameError}>Group name length must be between 1 and 40 characters.</p>
                         <label htmlFor="description">Description</label>
                         <input id="description" type="text" name="description" value={editedGroupData.description ?? ""} onChange={(e) => handleChange(e)} />
+                        <p className="error hidden" ref={groupDescriptionError}>Group description maximum length is 250 characters.</p>
                     </>
                 )
                     : (
@@ -127,8 +148,8 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
                                 id={member.user.id}
                                 username={member.user.username}
                                 isMember={true}
-                                handleChangeMembers={handleChangeMembers} 
-                                showControls={isOwner}/>
+                                handleChangeMembers={handleChangeMembers}
+                                showControls={isOwner} />
                         })
                     ) : (
                         contactsToAdd.length > 0 ? contactsToAdd.map((contact) => {
@@ -136,8 +157,8 @@ function GroupDetailsPage({ groupId, close, refetchChats }) {
                                 id={contact.contact.id}
                                 username={contact.contact.username}
                                 isMember={false}
-                                handleChangeMembers={handleChangeMembers} 
-                                showControls={isOwner}/>
+                                handleChangeMembers={handleChangeMembers}
+                                showControls={isOwner} />
                         }) : <p>No contacts to add</p>
                     )}
 
