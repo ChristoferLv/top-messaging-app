@@ -113,6 +113,7 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
     }
 
     const handleConfirmAction = async () => {
+        console.log("confirm", groupData)
         const result = await deleteGroup(groupData.id);
         if (result.success) {
             close();

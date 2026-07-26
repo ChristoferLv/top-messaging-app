@@ -47,7 +47,7 @@ model Contacts {
 
 model Chats {
   id          Int        @id @default(autoincrement())
-  type        ChatType   @default(NORMAL)
+  chatType    ChatType   @default(NORMAL)
   created_at  DateTime   @default(now()) @db.Timestamptz(6)
   updated_at  DateTime   @default(now()) @db.Timestamptz(6)
   senderId    Int
@@ -86,7 +86,7 @@ model GroupChats {
   description   String?         @db.VarChar(250)
   creatorId     Int
   creator       Users           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  type          ChatType        @default(GROUP)
+  chatType      ChatType        @default(GROUP)
   created_at    DateTime        @default(now()) @db.Timestamptz(6)
   updated_at    DateTime        @default(now()) @db.Timestamptz(6)
   usersGroups   UsersGroups[]

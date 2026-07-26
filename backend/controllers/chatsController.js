@@ -182,7 +182,8 @@ const sendFirstMessage = [
                 const newChat = await tx.chats.create({
                     data: {
                         recipientId: receiverId,
-                        senderId: userId
+                        senderId: userId,
+                        chatType:'NORMAL'
                     }
                 });
 

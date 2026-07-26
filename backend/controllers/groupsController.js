@@ -55,7 +55,7 @@ const createGroup = [
                     name: name,
                     description: description,
                     creatorId: userId,
-                    type: 'GROUP',
+                    chatType: 'GROUP',
                     usersGroups: {
                         createMany: {
                             data: treatedMembers
@@ -161,6 +161,14 @@ async function sendGroupMessage(req, res) {
             return result;
         }
         );
+        const receivers = await prisma.usersGroups.findMany({
+            where: {
+                groupChatId: groupId
+            },
+            select: { userId: true }
+        })
+        const treatedReceivers = receivers.map((receiver) => `user:${receiver.userId}`);
+        req.socketIo.to(treatedReceivers).emit("olha a mensagem", "chat:" + groupId)
         return res.status(201).send({ success: true, data: sendMessageResult });
     } catch (e) {
         console.log(e);
@@ -362,6 +370,7 @@ async function addMemberToGroup(req, res) {
     }
 
     try {
+        const userId = req.user.id;
         const groupId = parseInt(req.params.groupId);
         const memberId = parseInt(req.params.memberId);
         const group = await prisma.groupChats.findUnique({

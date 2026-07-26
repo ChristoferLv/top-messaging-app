@@ -1,4 +1,4 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4NTAwNjI3MSwiZXhwIjoxNzg1MDkyNjcxfQ.ZwKK0c0Uc50csrABp9008lCIjyi49th8TMIvbSYrED8
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc4NTEwNzkwMCwiZXhwIjoxNzg1MTk0MzAwfQ.tPb2eQwKkHez0-x6sBSR1S4-DPXU-ihfJadCkYgiMCQ
 
 GET http://localhost:3000/auth/check
 content-type: application/json
@@ -21,7 +21,7 @@ POST http://localhost:3000/auth/login
 content-type: application/json
 
 {
-    "username":"user1",
+    "username":"user2",
     "password":"pass"
 }
 
@@ -67,7 +67,7 @@ Authorization: {{token}}
 
 ###
 
-GET http://localhost:3000/chats/chatWith/2
+GET http://localhost:3000/chats/chatWith/1
 Authorization: {{token}}
 
 ###
@@ -82,7 +82,7 @@ content-type: application/json
 Authorization: {{token}}
 
 {
-    "message":""
+    "message":"UEPA11"
 }
 
 ###
@@ -120,12 +120,12 @@ Authorization: {{token}}
 
 ###
 
-POST http://localhost:3000/groups/5/messages
+POST http://localhost:3000/groups/16/messages
 content-type: application/json
 Authorization: {{token}}
 
 {
-    "message":"Group Message"
+    "message":"Group Message2"
 }
 
 ###
@@ -152,7 +152,13 @@ Authorization: {{token}}
 
 ###
 
-DELETE http://localhost:3000/groups/5/
+DELETE http://localhost:3000/groups/7
+content-type: application/json
+Authorization: {{token}}
+
+###
+
+POST http://localhost:3000/groups/6/leave
 content-type: application/json
 Authorization: {{token}}
 

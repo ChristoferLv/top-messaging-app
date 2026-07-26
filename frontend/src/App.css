@@ -166,6 +166,7 @@ label {
 }
 
 .chats-space {
+    height: 100%;
     margin-top: 10px;
     margin-bottom: 55px;
     /* height: calc(100% - 300px); */

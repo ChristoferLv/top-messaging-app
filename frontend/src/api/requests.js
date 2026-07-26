@@ -382,6 +382,7 @@ async function leaveGroup(groupId) {
 }
 
 async function deleteGroup(groupId) {
+    console.log("delete callded")
     try {
         const token = localStorage.getItem("token");
         const request = await fetch(`http://localhost:3000/groups/${groupId}`, {

@@ -70,6 +70,10 @@ app.use("/contacts", friendRouter);
 app.use("/users", userRoutes);
 app.use("/auth", authRouter);
 app.use("/midias", pictureRouter);
+app.get("/socket", (req,res)=>{
+  io.emit("test", "ALOOOOO!")
+  res.send({ok:true})
+})
 
 app.use("/", (req, res) => res.status(200).send({ message: "Ok" }))
 app.use((err, req, res, next) => {
