@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { fetchPicture } from "../api/requests";
 
-function UserPicture({ id, type }) {
-    const [pictureB64, setPicture] = useState(null);
+function UserPicture({ id, type, update }) {
+    const [pictureBuff, setPicture] = useState(null);
     const [mime, setMime] = useState(null);
+    const rawBuffer = new Uint8Array(pictureBuff);
+    const blob = new Blob([rawBuffer], { type: mime });
+    const imageUrl = URL.createObjectURL(blob);
 
     useEffect(() => {
         async function getPicture() {
@@ -17,15 +20,18 @@ function UserPicture({ id, type }) {
             }
         }
         getPicture();
-    }, [id, type])
+    }, [update])
 
-    const rawBuffer = new Uint8Array(pictureB64);
-    const blob = new Blob([rawBuffer], { type: mime });
-    const imageUrl = URL.createObjectURL(blob);
+    useEffect(() => {
+        return () => {
+            if(imageUrl) URL.revokeObjectURL(imageUrl);
+        }
+    },[])
     return (
+
         <>
             <div className="profile-pic user-mini-picture">
-                <img src={!pictureB64 ? "../public/avatar.png" :
+                <img src={!pictureBuff ? "../public/avatar.png" :
                     imageUrl} alt="" />
             </div>
         </>

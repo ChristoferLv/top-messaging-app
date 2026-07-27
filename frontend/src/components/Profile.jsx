@@ -2,12 +2,12 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../AuthContext";
 import { fetchPicture, findUserById, sendPicture, updateProfile } from "../api/requests";
 
-function ProfilePage({ userId, close }) {
-    const { user, isLoading } = useContext(AuthContext);
+function ProfilePage({ userId, close, setUpdate }) {
+    const { user, isLoading, setUser } = useContext(AuthContext);
     const [profile, setProfile] = useState(null);
     const fileInputRef = useRef(null);
     const errorMessage = useRef(null);
-    const [pictureB64, setPicture] = useState(null);
+    const [pictureBuff, setPicture] = useState(null);
     const [mime, setMime] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
@@ -52,6 +52,7 @@ function ProfilePage({ userId, close }) {
         const result = await sendPicture(data);
         if (result.success) {
             setPicture(result.data.data);
+            setUpdate(c => c+1)
         }
     }
 
@@ -82,7 +83,7 @@ function ProfilePage({ userId, close }) {
         }
     }
 
-    const rawBuffer = new Uint8Array(pictureB64);
+    const rawBuffer = new Uint8Array(pictureBuff);
     const blob = new Blob([rawBuffer], { type: mime });
     const imageUrl = URL.createObjectURL(blob);
 
@@ -111,7 +112,7 @@ function ProfilePage({ userId, close }) {
                     style={isEditing ? {} : { pointerEvents: "none" }}
                     className="profile-pic" onClick={handleClickImage}
                 >
-                    <img src={!pictureB64 ? "../public/avatar.png" :
+                    <img src={!pictureBuff ? "../public/avatar.png" :
                         imageUrl} alt="" />
                 </div>
                 <p className="profile-username">{profile.username}</p>

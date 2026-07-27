@@ -11,8 +11,6 @@ async function checkTokenExpired() {
                 'Authorization': token
             }
         });
-        console.log(rawResponse)
-        console.log(rawResponse.status)
         if (rawResponse.status == 401) {
             return false;
         } else if (rawResponse.status == 200) {
@@ -577,6 +575,7 @@ async function fetchMessageMidia(midiaId, origin) {
         });
         if (request.ok) {
             const midia = await request.json();
+            console.log(midia)
             return midia;
         }
     } catch (e) {

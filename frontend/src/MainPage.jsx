@@ -25,6 +25,7 @@ function MainPage() {
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [seeGroup, setSeeGroup] = useState(-1);
+    const [update, setUpdate] = useState(0);
 
     const sortedChatsList = chatsList.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
@@ -47,7 +48,6 @@ function MainPage() {
             if (chat != null) {
                 console.log("here")
                 if (chat.chatType == "GROUP") {
-                    console.log("here2")
                     const messages = await fetchMessagesOfGroup(chat.groupId);
                     if (messages) {
                         setMessages(messages.data);
@@ -347,7 +347,7 @@ function MainPage() {
         mainPane = <NewGroupPage close={handleShowCreateGroup} refetchChats={fetchChats} />
     }
     else if (showProfile != -1) {
-        mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} />
+        mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} setUpdate={setUpdate}/>
     } else if (chat) {
         if (chat.chatType == "GROUP") {
             mainPane = <GroupChatPanel chat={chat} fetchChats={fetchChats} chatsList={chatsList} setChatsList={setChatsList} groupDeletion={groupDeletion} groupId={chat.groupId} messages={messages}/>
@@ -447,7 +447,7 @@ function MainPage() {
                         <div className="main-header">
                             <p className="app-title">WhatsUp</p>
                             <div className="profile-btn" onClick={() => seeUserProfile(user.id)}>
-                                <UserPicture id={user.id} type={"NORMAL"} />
+                                <UserPicture id={user.id} type={"NORMAL"} update={update}/>
                                 <p className="greetings">Hello {user.username}</p>
                             </div>
                             <div onClick={(e) => handleToggleSidePane()} className="new-chat-btn">
@@ -471,10 +471,11 @@ function MainPage() {
                                         </div>
                                     </div>
                                 return <div key={`${chatItem.chatType}-${chatItem.id}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
+                                    {console.log("rendering here")}
                                     <UserPicture id={chatItem.id} type={chatItem.chatType} />
                                     <div className="user-item-data">
                                         <p>{chatItem.id} - {chatItem.username}</p>
-                                        <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
+                                        <p>{chatItem.lastMessage?.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage?.content}</p>
                                         <p>{new Date(chatItem.updated_at).toLocaleString()}</p>
                                     </div>
                                 </div>

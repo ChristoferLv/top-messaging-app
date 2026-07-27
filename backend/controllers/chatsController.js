@@ -13,7 +13,7 @@ const validateMessage = [
             return true;
         })
         .isLength({ max: 20000 }).withMessage("The maximum message length is 20000 characters.")
-        // .isLength({ min: 1 }).withMessage("Minimum message length is 1 character.")
+    // .isLength({ min: 1 }).withMessage("Minimum message length is 1 character.")
 ];
 
 
@@ -158,6 +158,9 @@ const sendFirstMessage = [
             return res.status(400).send({ success: false, message: "Maximum midia size is 5MB." });
         }
 
+        if (midiaMessage && !req.file.mimetype.startsWith("image/"))
+            return res.status(400).send({ success: false, message: "Invalid file type." });
+
         try {
             const friend = await prisma.contacts.findUnique({
                 where: { contactOwnerId_contactId: { contactOwnerId: userId, contactId: receiverId } }
@@ -183,7 +186,7 @@ const sendFirstMessage = [
                     data: {
                         recipientId: receiverId,
                         senderId: userId,
-                        chatType:'NORMAL'
+                        chatType: 'NORMAL'
                     }
                 });
 
@@ -208,13 +211,11 @@ const sendFirstMessage = [
                 }
 
                 if (midiaMessage) {
-                    const fileData = new Buffer.from(req.file.buffer).toString('base64');
-                    const mime = req.file.mimetype;
-
                     fileRef = await tx.midias.create(
                         {
                             data: {
-                                content: `${mime}:${fileData}`,
+                                content: req.file.buffer,
+                                mime: req.file.mimetype,
                                 ownerId: userId,
                                 messageId: result.id,
                             }
@@ -393,6 +394,10 @@ const sendMessage = [
             return res.status(400).send({ success: false, message: "Maximum midia size is 5MB." });
         }
 
+        if (midiaMessage && !req.file.mimetype.startsWith("image/"))
+            return res.status(400).send({ success: false, message: "Invalid file type." });
+
+
         try {
             const chat = await prisma.chats.findUnique({
                 where: { id: chatId }
@@ -443,13 +448,11 @@ const sendMessage = [
                 }
 
                 if (midiaMessage) {
-                    const fileData = new Buffer.from(req.file.buffer).toString('base64');
-                    const mime = req.file.mimetype;
-
                     fileRef = await tx.midias.create(
                         {
                             data: {
-                                content: `${mime}:${fileData}`,
+                                content: req.file.buffer,
+                                mime: req.file.mimetype,
                                 ownerId: userId,
                                 messageId: result.id,
                             }

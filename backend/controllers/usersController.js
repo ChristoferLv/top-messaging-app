@@ -152,7 +152,6 @@ async function uploadPicture(req, res) {
     try {
 
         const userId = req.user.id;
-        const content = new Buffer.from(req.file.buffer).toString('base64');
         const mime = req.file.mimetype;
 
         if (!mime.startsWith("image/"))

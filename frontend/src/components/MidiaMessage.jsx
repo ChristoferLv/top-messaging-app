@@ -2,23 +2,28 @@ import { useEffect, useRef, useState } from "react";
 import { fetchMessageMidia } from "../api/requests";
 
 function MidiaMessage({ midiaId, origin }) {
-    const [pictureB64, setPicture] = useState(null);
-    const [mime, picture] = pictureB64 ? pictureB64.split(":") : [null, null];
+    const [midiaBuff, setMidia] = useState(null);
+    const [mime, setMime] = useState(null);
     const [modal, setModal] = useState(false);
 
     useEffect(() => {
-        async function getPicture() {
-            const picture = await fetchMessageMidia(midiaId, origin);
-            console.log(picture)
-            setPicture(picture.data.content);
+        async function getMidia() {
+            const midia = await fetchMessageMidia(midiaId, origin);
+            setMidia(midia.data.content?.data);
+            setMime(midia.data.mime);
+
         }
-        getPicture();
+        getMidia();
     }, []);
+
+    const rawBuffer = new Uint8Array(midiaBuff);
+    const blob = new Blob([rawBuffer], { type: mime });
+    const imageUrl = URL.createObjectURL(blob);
 
     return (
         <>
             <div className="midia" onClick={() => setModal(true)}>
-                <img src={`data:${mime};base64,${picture}`} alt="" />
+                <img src={imageUrl} alt="" />
             </div>
 
             <Modal
@@ -26,7 +31,7 @@ function MidiaMessage({ midiaId, origin }) {
                 closeModal={() => setModal(false)}
             >
                 <div className="modal-image">
-                    <img src={`data:${mime};base64,${picture}`} alt="" />
+                    <img src={imageUrl} alt="" />
                 </div>
             </Modal >
         </>

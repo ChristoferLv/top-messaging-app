@@ -94,6 +94,14 @@ async function sendGroupMessage(req, res) {
             return res.status(403).send({ success: false, message: "You are not member of this group." });
         }
 
+        if (midiaMessage && req.file.size > 5000000) {
+            return res.status(400).send({ success: false, message: "Maximum midia size is 5MB." });
+        }
+
+        if (midiaMessage && !req.file.mimetype.startsWith("image/"))
+            return res.status(400).send({ success: false, message: "Invalid file type." });
+
+
         let fileRef = null;
         let result = null;
         const sendMessageResult = await prisma.$transaction(async (tx) => {
@@ -133,13 +141,11 @@ async function sendGroupMessage(req, res) {
             }
 
             if (midiaMessage) {
-                const fileData = new Buffer.from(req.file.buffer).toString('base64');
-                const mime = req.file.mimetype;
-
                 fileRef = await tx.groupMidias.create(
                     {
                         data: {
-                            content: `${mime}:${fileData}`,
+                            content: req.file.buffer,
+                            mime: req.file.mimetype,
                             ownerId: userId,
                             groupMessageId: result.id,
                             groupId: groupId,
