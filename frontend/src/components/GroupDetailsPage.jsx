@@ -1,5 +1,5 @@
 import { use, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { addMemberToGroup, createGroup, deleteGroup, editGroup, fetchGroupDetails, getMyContacts, leaveGroup, removeMemberFromGroup } from "../api/requests";
+import { addMemberToGroup, createGroup, deleteGroup, editGroup, fetchGroupDetails, getGroupPicture, getMyContacts, leaveGroup, removeMemberFromGroup, updateGroupPicture } from "../api/requests";
 import { ChatType } from "../defaults";
 import UserPicture from "./UserPicture";
 import { AuthContext } from "../AuthContext";
@@ -15,6 +15,10 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
     const groupNameError = useRef(null);
     const groupDescriptionError = useRef(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [pictureBuff, setPicture] = useState(null);
+    const [mime, setMime] = useState(null);
+    const fileInputRef = useRef(null);
+
 
 
 
@@ -37,6 +41,15 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
 
         return () => setMyContacts([]);
     }, [groupData]);
+
+    useEffect(() => {
+        async function getPicture() {
+            const picture = await getGroupPicture(groupId);
+            setPicture(picture.data.buffer?.data);
+            setMime(picture.data.mime);
+        }
+        getPicture();
+    }, [groupId])
 
     useEffect(() => {
         fetchGroupData();
@@ -125,6 +138,32 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
         setIsDialogOpen(false);
     };
 
+    function handleClickImage(e) {
+        fileInputRef.current.click();
+    }
+
+    async function handleUploadImage(e) {
+        e.target.parentElement.requestSubmit();
+    }
+
+    async function handlePictureSubmit(e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        fileInputRef.current.value = "";
+        if (data.picture.size > 5000000) {
+            alert("Maximum picture file size is 5MB.");
+            return;
+        }
+
+        const result = await updateGroupPicture(groupId, data);
+        console.log(result)
+        if (result.success) {
+            setPicture(result.data.buffer?.data);
+            setMime(result.data.mime);
+            refetchChats();
+        }
+    }
+
     if (!groupData || !myContacts) return (<><div className="new-group-page"><p className="loading">Loading...</p></div></>)
 
     console.log(groupData)
@@ -134,10 +173,22 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
     const groupMembers = groupData.usersGroups.map((member) => member.user.id);
     const contactsToAdd = myContacts.filter((contact) => !(groupMembers.includes(contact.contact.id)));
 
-
+    const rawBuffer = new Uint8Array(pictureBuff);
+    const blob = new Blob([rawBuffer], { type: mime });
+    const imageUrl = URL.createObjectURL(blob);
 
     return (<>
         <div className="new-group-page">
+            <form onSubmit={handlePictureSubmit}>
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    name="picture"
+                    style={{ display: "none" }}
+                    onChange={handleUploadImage}
+                />
+            </form>
             <div className="group-page-controls">
                 <p className="create-group-title">Group Details</p>
                 <button onClick={close}>&larr; Back</button>
@@ -145,7 +196,15 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
                 {!isOwner ? <button onClick={handleEdit}>Leave group</button> : null}
                 {isOwner ? <button onClick={handleDeleteGroup}>Delete group</button> : null}
             </div>
+
             <div className="new-group-controls">
+                <div
+                    style={isEditing ? {} : { pointerEvents: "none" }}
+                    className="profile-pic group-pic" onClick={handleClickImage}
+                >
+                    <img src={!pictureBuff ? "../public/avatar.png" :
+                        imageUrl} alt="" />
+                </div>
                 {isEditing ? (
                     <>
                         <label htmlFor="name">Group name</label>
@@ -178,15 +237,15 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
 
                     (
                         membersList.length > 0 ?
-                        membersList.map((member) => {
-                            return <ContactItem key={member.id}
-                                id={member.id}
-                                username={member.username}
-                                isMember={true}
-                                handleChangeMembers={handleChangeMembers}
-                                showControls={isOwner} />
-                        })
-                        :<p>The group has no members</p>
+                            membersList.map((member) => {
+                                return <ContactItem key={member.id}
+                                    id={member.id}
+                                    username={member.username}
+                                    isMember={true}
+                                    handleChangeMembers={handleChangeMembers}
+                                    showControls={isOwner} />
+                            })
+                            : <p>The group has no members</p>
                     ) : (
                         contactsToAdd.length > 0 ? contactsToAdd.map((contact) => {
                             return <ContactItem key={contact.contact.id}

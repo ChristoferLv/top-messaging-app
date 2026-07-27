@@ -520,6 +520,102 @@ async function deleteGroup(req, res) {
     }
 }
 
+async function changeGroupPicture(req, res) {
+    try {
+        if (!req.user) {
+            return res.status(401).send({ success: false });
+        }
+
+        const userId = req.user.id;
+        const groupId = parseInt(req.params.groupId);
+        const mime = req.file.mimetype;
+
+        if (!mime.startsWith("image/"))
+            return res.status(400).send({ success: false, message: "Invalid file type." });
+
+        if (req.file.size > 5000000) {
+            return res.status(400).send({ success: false, message: "Maximum picture file size is 5MB." });
+        }
+
+        const group = await prisma.groupChats.findUnique({
+            where: {
+                id: groupId
+            }
+        });
+
+        if (!group) {
+            return res.status(400).send({ success: false, message: "Group not Found" });
+        }
+
+        if (group.creatorId != userId) {
+            return res.status(400).send({ success: false, message: "You are not the group owner." });
+        }
+
+        const result = await prisma.groupChats.update(
+            {
+                data: { picture: req.file.buffer, mime: mime },
+                where: { id: groupId }
+            }
+        );
+        let newbuffer = null;
+        if (result.picture)
+            newbuffer = Buffer.from(result.picture, result.picture.byteOffset, result.picture.byteLength)
+        return res.status(201).send({ success: true, data: {mime:mime, buffer:newbuffer} });
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send({ success: false });
+    }
+}
+
+async function getGroupPicture(req, res) {
+    if (!req.user) {
+        return res.status(401).send({ success: false });
+    }
+
+    try {
+        const groupId = parseInt(req.params.groupId);
+        const userId = req.user.id
+
+        const group = await prisma.groupChats.findUnique({
+            where: { id: groupId },
+        });
+
+        if (!group) {
+            return res.status(400).send({ success: false, message: "Group not Found" });
+        }
+
+        const inGroup = await prisma.usersGroups.findUnique({
+            where: {
+                userId_groupChatId: {
+                    userId: userId,
+                    groupChatId: groupId
+                }
+            }
+        });
+
+        if (!inGroup) {
+            return res.status(400).send({ success: false, message: "You are not in this group." });
+        }
+
+        const result = await prisma.groupChats.findUnique(
+            {
+                where: { id: groupId },
+                select: { picture: true, mime: true }
+            }
+        );
+
+        let newbuffer = null;
+        if (result.picture)
+            newbuffer = Buffer.from(result.picture, result.picture.byteOffset, result.picture.byteLength)
+
+        res.status(200).send({ success: true, data: { buffer: newbuffer, mime: result.mime } });
+    } catch (e) {
+        res.status(500).send({ success: false });
+        console.log(e);
+    }
+}
+
+
 
 export {
     createGroup,
@@ -530,5 +626,7 @@ export {
     addMemberToGroup,
     editGroup,
     leaveGroup,
-    deleteGroup
+    deleteGroup,
+    changeGroupPicture,
+    getGroupPicture
 }

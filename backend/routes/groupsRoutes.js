@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addMemberToGroup, createGroup, deleteGroup, editGroup, getGroupDetails, getMessageOfGroup, leaveGroup, removeMemberFromGroup, sendGroupMessage } from "../controllers/groupsController.js";
+import { addMemberToGroup, changeGroupPicture, createGroup, deleteGroup, editGroup, getGroupDetails, getGroupPicture, getMessageOfGroup, leaveGroup, removeMemberFromGroup, sendGroupMessage } from "../controllers/groupsController.js";
 import { passport } from "../authUtils.js";
 
 import multer from "multer";
@@ -20,6 +20,7 @@ groupRouter.post("/:groupId/messages", upload.single("midia"), passport.authenti
 groupRouter.delete("/:groupId/members/:memberId", passport.authenticate('jwt', { session: false }), removeMemberFromGroup);
 groupRouter.post("/:groupId/members/:memberId", passport.authenticate('jwt', { session: false }), addMemberToGroup);
 groupRouter.post("/:groupId/leave", passport.authenticate('jwt', { session: false }), leaveGroup);
-
+groupRouter.get("/:groupId/picture", passport.authenticate('jwt', { session: false }),getGroupPicture);
+groupRouter.patch("/:groupId/picture", upload.single("picture"), passport.authenticate('jwt', { session: false }),changeGroupPicture);
 
 export default groupRouter;

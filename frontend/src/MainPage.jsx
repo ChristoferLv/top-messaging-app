@@ -35,6 +35,7 @@ function MainPage() {
 
     const fetchChats = useCallback(async () => {
         try {
+            console.log("refetching chats")
             const chats = await fetchMyChats();
             setChatsList(chats.data);
         } catch (e) {

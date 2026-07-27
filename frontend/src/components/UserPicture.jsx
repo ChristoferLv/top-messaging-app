@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchPicture } from "../api/requests";
+import { fetchPicture, getGroupPicture } from "../api/requests";
 
 function UserPicture({ id, type, update }) {
     const [pictureBuff, setPicture] = useState(null);
@@ -11,9 +11,10 @@ function UserPicture({ id, type, update }) {
     useEffect(() => {
         async function getPicture() {
             if (type == "GROUP") {
-                return;
-            }
-            if (id) {
+                const picture = await getGroupPicture(id);
+                setPicture(picture.data.buffer?.data);
+                setMime(picture.data.mime);
+            } else if (id) {
                 const picture = await fetchPicture(id);
                 setPicture(picture.data.buffer?.data);
                 setMime(picture.data.mime);
@@ -24,9 +25,12 @@ function UserPicture({ id, type, update }) {
 
     useEffect(() => {
         return () => {
-            if(imageUrl) URL.revokeObjectURL(imageUrl);
+            if (imageUrl) URL.revokeObjectURL(imageUrl);
         }
-    },[])
+    }, [])
+
+
+    
     return (
 
         <>

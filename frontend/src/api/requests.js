@@ -401,6 +401,49 @@ async function deleteGroup(groupId) {
     }
 }
 
+async function updateGroupPicture(groupId, data) {
+    try {
+        const formData = new FormData();
+        formData.append("picture", data.picture);
+        const token = localStorage.getItem("token");
+        const result = await fetch(`http://localhost:3000/groups/${groupId}/picture`, {
+
+            method: 'PATCH',
+            body: formData,
+
+            headers: {
+                Authorization: token,
+            },
+        })
+        const resultData = await result.json();
+        return resultData;
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+async function getGroupPicture(groupId) {
+    try {
+        const token = localStorage.getItem("token");
+        const request = await fetch(`http://localhost:3000/groups/${groupId}/picture`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            }
+        });
+        if (request.ok) {
+            const picture = await request.json();
+            return picture;
+        }
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
 
 
 
@@ -587,6 +630,8 @@ async function fetchMessageMidia(midiaId, origin) {
 
 
 
+
+
 export {
     checkTokenExpired,
     login,
@@ -609,6 +654,8 @@ export {
     deleteGroup,
     addContact,
     getMyContacts,
+    updateGroupPicture,
+    getGroupPicture,
     findUserWithUsername,
     findUserById,
     updateProfile,

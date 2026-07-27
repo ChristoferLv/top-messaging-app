@@ -498,6 +498,11 @@ label {
     }
 }
 
+.group-pic{
+    align-self: center;
+    max-height: 200px;
+}
+
 .create-group-btn {
     margin-top: 10px;
     font-size: large;
@@ -626,14 +631,6 @@ label {
     }
 }
 
-
-
-
-
-
-
-
-
 .msg {
     display: flex;
     flex-direction: column;
@@ -659,7 +656,7 @@ label {
 
 .msg.sent {
     border-radius: var(--rad) var(--rad-sm) var(--rad-sm) var(--rad);
-    background: #42a5f5;
+    background: #0564e9;
     color: #fff;
     /* moves it to the right */
     margin-left: auto;
@@ -669,11 +666,8 @@ label {
     border-radius: var(--rad-sm) var(--rad) var(--rad) var(--rad-sm);
     background: #f1f1f1;
     color: #555;
-    /* moves it to the left */
     margin-right: auto;
 }
-
-/* Improve radius for messages group */
 
 .msg.sent:first-child,
 .msg.rcvd+.msg.sent {
@@ -977,8 +971,6 @@ dialog {
     margin-bottom: 0px;
 }
 
-
-
 .overlay {
     position: fixed;
     top: 0;
@@ -991,7 +983,6 @@ dialog {
     justify-content: center;
     z-index: 1000;
 }
-
 
 .confirm-dialog {
     background-color: #fff;

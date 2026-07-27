@@ -86,6 +86,8 @@ model GroupChats {
   id            Int             @id @default(autoincrement())
   name          String          @db.VarChar(60)
   description   String?         @db.VarChar(300)
+  picture       Bytes?
+  mime          String?
   creatorId     Int
   creator       Users           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   chatType      ChatType        @default(GROUP)
