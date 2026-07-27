@@ -5,13 +5,11 @@ import UserPicture from "./UserPicture";
 
 async function loadContacts() {
     const contacts = await getMyContacts();
-    console.log(contacts)
     return contacts.data;
 }
 
 function MyContacts({ closeContactsList, selectUser, createGroup }) {
     const [contactsList, setContactsList] = useState([]);
-    const [showAddContact, setShowAddContact] = useState(false);
     const [searchUsername, setSearchUsername] = useState("");
     const [foundContact, setFoundContact] = useState(null);
     const [contactSearched, setContactSearched] = useState(false);
@@ -36,7 +34,6 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
         setSearchedUsername(searchUsername);
         setErrorMessage(false);
         const contact = await findUserWithUsername(searchUsername);
-        console.log(contact)
         if (contact.success) {
             setFoundContact(contact.data);
             setContactSearched(true);
@@ -48,7 +45,6 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
 
     async function handleAddContact() {
         const result = await addContact(foundContact.id);
-        console.log(result)
         if (result.success) {
             const contacts = await loadContacts();
             setContactsList(contacts);

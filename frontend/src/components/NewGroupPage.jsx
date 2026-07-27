@@ -16,7 +16,6 @@ function NewGroupPage({ close, refetchChats }) {
                 setMyContacts(contacts.data);
             }
         }
-
         getContacts();
 
         return () => setMyContacts([]);
@@ -66,7 +65,10 @@ function NewGroupPage({ close, refetchChats }) {
     if (!myContacts) return (<><div className="new-group-page"><p className="loading">Loading...</p></div></>)
     return (<>
         <div className="new-group-page">
-            <p className="create-group-title">Create new Group</p>
+            <div className="group-page-controls">
+                <p className="create-group-title">Create new Group</p>
+                <button onClick={close}>Close</button>
+            </div>
             <div className="new-group-controls">
                 <label htmlFor="name">Group name*</label>
                 <input id="name" type="text" name="name" value={groupData.name} onChange={(e) => handleChange(e)} />

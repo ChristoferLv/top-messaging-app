@@ -8,7 +8,6 @@ export default function ConfirmationDialog({
     onConfirm,
     onCancel
 }) {
-    // If the state is false, do not render anything in the DOM
     if (!isOpen) return null;
 
     return (

@@ -28,11 +28,8 @@ function UserPicture({ id, type, update }) {
             if (imageUrl) URL.revokeObjectURL(imageUrl);
         }
     }, [])
-
-
     
     return (
-
         <>
             <div className="profile-pic user-mini-picture">
                 <img src={!pictureBuff ? "../public/avatar.png" :

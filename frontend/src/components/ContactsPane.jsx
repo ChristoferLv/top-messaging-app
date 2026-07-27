@@ -69,7 +69,6 @@ function ContactsPane({ user, chatsList, logout, update, selectUser, createGroup
                         </div>
                     }) : <p>No users</p>}
                 </div>
-                {/* <hr className="limit" /> */}
             </div>
     )
 }

@@ -19,9 +19,6 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
     const [mime, setMime] = useState(null);
     const fileInputRef = useRef(null);
 
-
-
-
     const fetchGroupData = useCallback(async () => {
         const details = await fetchGroupDetails(groupId);
         if (details) {
@@ -36,7 +33,6 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
                 setMyContacts(contacts.data);
             }
         }
-
         getContacts();
 
         return () => setMyContacts([]);
@@ -53,7 +49,6 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
 
     useEffect(() => {
         fetchGroupData();
-
         return () => setgroupData(null);
     }, []);
 
@@ -126,7 +121,6 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
     }
 
     const handleConfirmAction = async () => {
-        console.log("confirm", groupData)
         const result = await deleteGroup(groupData.id);
         if (result.success) {
             close();
@@ -156,7 +150,6 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
         }
 
         const result = await updateGroupPicture(groupId, data);
-        console.log(result)
         if (result.success) {
             setPicture(result.data.buffer?.data);
             setMime(result.data.mime);
@@ -165,8 +158,6 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
     }
 
     if (!groupData || !myContacts) return (<><div className="new-group-page"><p className="loading">Loading...</p></div></>)
-
-    console.log(groupData)
 
     const isOwner = groupData.creatorId == user.id;
     const membersList = groupData.usersGroups.filter((user) => user.user.id != groupData.creatorId).map((user) => { return { id: user.user.id, username: user.user.username } });
@@ -193,7 +184,7 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
                 <p className="create-group-title">Group Details</p>
                 <button onClick={close}>&larr; Back</button>
                 {isOwner ? <button onClick={handleEdit}>{isEditing ? "Cancel Edit" : "Edit"}</button> : null}
-                {!isOwner ? <button onClick={handleEdit}>Leave group</button> : null}
+                {!isOwner ? <button onClick={handleLeaveGroup}>Leave group</button> : null}
                 {isOwner ? <button onClick={handleDeleteGroup}>Delete group</button> : null}
             </div>
 

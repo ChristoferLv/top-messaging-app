@@ -36,7 +36,6 @@ function MainPage() {
 
     const fetchChats = useCallback(async () => {
         try {
-            console.log("refetching chats")
             const chats = await fetchMyChats();
             setChatsList(chats.data);
         } catch (e) {
@@ -46,9 +45,7 @@ function MainPage() {
 
     const getMessagesOfChat = useCallback(async () => {
         try {
-            console.log("chatt", chat)
             if (chat != null) {
-                console.log("here")
                 if (chat.chatType == "GROUP") {
                     const messages = await fetchMessagesOfGroup(chat.groupId);
                     if (messages) {
@@ -86,51 +83,15 @@ function MainPage() {
     }, []);
 
     useEffect(() => {
-        console.log("socket updated", socket)
-        console.log("connected===", socket)
-        function onConnect() {
-            console.log("connected")
-        }
-
-        function onDisconnect() {
-            console.log("disconnected")
-        }
-
-        function test(value) {
-            console.log("TEST RECEIVED", value)
-        }
-
         function onFooEvent(value) {
-            console.log("inside on foo alsoaaaaaaaaaaaaaaaa")
-            console.log("foor", value)
             fetchChats();
-            
-            // if (1==2) {
-            //     console.log("yes chat", chat)
-            //     console.log(chat.chat?.chatType, ChatType.NORMAL, chat.chat?.id, chatId, chat.chat?.id == chatId, )
-            //     console.log(chat.chatType == ChatType.GROUP && chat.groupId == chatId)
-            //     if (chat.chatType == ChatType.GROUP && chat.groupId == chatId)
-            //         getMessagesOfChat();
-            //     else if (chat.chat?.chatType == ChatType.NORMAL && chat.chat?.id == chatId) {
-            //         console.log("refetch via socket=======")
-            //         getMessagesOfChat();
-            //     }
-            // } else {
-            // }
         }
 
         if (socket) {
-            // socket.on('connect', onConnect);
-            // socket.on('disconnect', onDisconnect);
-            socket.on("test", test)
             socket.on('olha a mensagem', onFooEvent);
         }
         return () => {
-            console.log("cleaning up")
             if (socket) {
-                socket.off("test", test)
-                // socket.off('connect', onConnect);
-                // socket.off('disconnect', onDisconnect);
                 socket.off('olha a mensagem', onFooEvent);
             }
         };
@@ -138,61 +99,18 @@ function MainPage() {
 
     useEffect(() => {
         if (user && !isLoading) {
-            console.log("connecting")
             const storagedToken = localStorage.getItem('token');
             socketIO.auth = { token: storagedToken }
             const connection = socketIO.connect();
             setSocket(connection);
-            // const storagedToken = localStorage.getItem('token');
-            // const socket = io("http://localhost:3000", {
-            //     auth: {
-            //         token: storagedToken
-            //     }
-            // });
-            // socket.connect();
-            // setSocket(socket)
         }
     }, [user, isLoading]);
-
-
-
-    // useEffect(() => {
-    //     async function getAllUsers() {
-    //         try {
-    //             const users = await fetchAllUsers();
-    //             console.log(users)
-    //             setUsersList(users.data);
-    //         } catch (e) {
-    //             console.log(e);
-    //         }
-
-    //     }
-    //     getAllUsers();
-    // }, []);
 
     useEffect(() => {
         fetchChats();
     }, []);
 
-
-
-    // useEffect(() => {
-    //     if (containerRef.current) {
-    //         containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    //     }
-    // }, [messages]); // Fires every time the messages array updates
-
-    // useEffect(() => {
-    //     if (chat != null) {
-    //         console.log("get the messages")
-    //         getMessagesOfChat();
-    //     }
-    //     setTypingMessage("");
-    // }, [chat])
-
-
     async function handleSelectUser(newChat) {
-        // setChat(null);
         setMessages(null);
         setSeeGroup(-1);
         setshowProfile(-1);
@@ -203,83 +121,10 @@ function MainPage() {
             setChat(newChat);
             return;
         }
-        console.log("newchat", newChat)
         const chatExistsData = await checkChatWith(newChat.id);
 
         setChat(chatExistsData.data);
-
     }
-
-    // async function handleSendMessage(e) {
-    //     e.preventDefault();
-    //     const data = Object.fromEntries(new FormData(e.target).entries());
-    //     console.log(data)
-    //     fileInputRef.current.value = "";
-    //     if (data.midia.size > 5000000) {
-    //         alert("Maximum midia size is 5MB.");
-    //         return;
-    //     }
-
-    //     if (data.message.length < 1) {
-    //         return;
-    //     }
-
-    //     if (chat?.chatType == "GROUP") {
-    //         const result = await sendGroupMessage(chat.groupId, data);
-    //         if (result) {
-    //             const newChats = chatsList.map((newChat) => {
-    //                 if (newChat.chatId == chat.id) {
-    //                     return { ...newChat, updated_at: new Date().toISOString(), lastMessage: result.data }
-    //                 }
-    //                 return newChat;
-    //             });
-    //             setChatsList(newChats);
-    //         }
-    //         const newMessages = await fetchMessagesOfGroup(chat.groupId);
-    //         if (newMessages) {
-    //             setMessages(newMessages.data);
-    //         }
-    //         setTypingMessage("");
-    //         return;
-    //     }
-    //     if (!chat.chat) {
-    //         const result = await sendFirstMessage(chat.user.id, data);
-    //         if (result) {
-    //             console.log("new chat data", result.data)
-    //             setChat(result.data);
-    //             fetchChats();
-    //             const newMessages = await fetchMessagesOfChat(result.chat.id);
-    //             if (newMessages) {
-    //                 setMessages(newMessages.data);
-    //             }
-    //         }
-    //     } else {
-    //         const result = await sendMessage(chat.chat.id, data);
-    //         if (result) {
-    //             const newChats = chatsList.map((newChat) => {
-    //                 if (newChat.chatId == chat.chat.id) {
-    //                     return { ...newChat, updated_at: new Date().toISOString(), lastMessage: result.data }
-    //                 }
-    //                 return newChat;
-    //             });
-    //             setChatsList(newChats);
-    //         }
-    //         const newMessages = await fetchMessagesOfChat(chat.chat.id);
-    //         if (newMessages) {
-    //             setMessages(newMessages.data);
-    //         }
-    //     }
-    //     setTypingMessage("");
-    // }
-
-    // function handleTypingMessage(e) {
-    //     console.log("typing", e.target.value)
-    //     if (e.target.value.length > 20000) {
-    //         alert("Maximum message length is 20000 characters.")
-    //         return;
-    //     }
-    //     setTypingMessage(e.target.value);
-    // }
 
     function handleToggleSidePane() {
         setViewChats(c => !c);
@@ -296,25 +141,6 @@ function MainPage() {
     console.log("chats list", chatsList)
     console.log("sorted chats list", sortedChatsList)
     console.log("chat", chat, chat?.chatType)
-
-    // const fileInputRef = useRef(null);
-
-    // function handleClickAttach(e) {
-    //     fileInputRef.current.click();
-    // }
-
-    // async function handleUploadImage(e) {
-    //     e.target.parentElement.requestSubmit();
-    // }
-
-    // async function handlePictureSubmit(e) {
-    //     e.preventDefault();
-    //     const data = Object.fromEntries(new FormData(e.target).entries());
-    //     const result = await sendPicture(data);
-    //     if (result) {
-    //         setPicture(result.data);
-    //     }
-    // }
 
     async function seeUserProfile(userId) {
         setSeeGroup(-1);
@@ -335,7 +161,6 @@ function MainPage() {
     }
 
     function groupDeletion() {
-        console.log("delete group")
         fetchChats();
         setChat(null);
     }
@@ -353,87 +178,8 @@ function MainPage() {
     } else if (chat) {
         if (chat.chatType == "GROUP") {
             mainPane = <GroupChatPanel chat={chat} fetchChats={fetchChats} chatsList={chatsList} setChatsList={setChatsList} groupDeletion={groupDeletion} groupId={chat.groupId} messages={messages}/>
-
-            // mainPane = <div className="chat-pane">
-            //     <div className="chat-header" onClick={() => { seeGroupDetails(chat.groupId) }}>
-            //         <UserPicture id={chat.groupId} type={chat.chatType} />
-            //         <p>{chat.username}</p>
-            //     </div>
-            //     <div className="chat-body">
-            //         <div className="messages-list" ref={containerRef}>
-            //             {/* <p>Messages</p> */}
-            //             {messages && messages.map((message) => {
-            //                 if (message.type == "MIDIA")
-            //                     return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-            //                         <MidiaMessage midiaId={message.id} origin={ChatType.GROUP} />
-            //                     </div>
-            //                 return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-            //                     <p>{message.id} - {message.content}</p>
-            //                     <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
-            //                 </div>
-            //             })}
-            //         </div>
-            //     </div>
-            //     <div className="chat-controls">
-            //         <form onSubmit={handleSendMessage} action="">
-            //             <input
-            //                 ref={fileInputRef}
-            //                 type="file"
-            //                 accept="image/*"
-            //                 name="midia"
-            //                 style={{ display: "none" }}
-            //                 onChange={handleUploadImage}
-            //             />
-            //             <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
-            //             <button className="send-picture"
-            //                 type="button"
-            //                 onClick={handleClickAttach}
-            //             ><img src="../public/attach-icon.png" alt="" />
-            //             </button>
-            //         </form>
-            //     </div>
-            // </div>
         } else {
             mainPane = <NormalChatPanel chat={chat} chatsList={chatsList} fetchChats={fetchChats} setChatsList={setChatsList}/>
-            // mainPane = <div className="chat-pane">
-            //     <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
-            //         <UserPicture id={chat.user.id} type={chat.chatType} />
-            //         <p>{chat.user.username}</p>
-            //     </div>
-            //     <div className="chat-body">
-            //         <div className="messages-list" ref={containerRef}>
-            //             {/* <p>Messages</p> */}
-            //             {messages && messages.map((message) => {
-            //                 if (message.type == "MIDIA")
-            //                     return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-            //                         <MidiaMessage midiaId={message.id} origin={ChatType.NORMAL} />
-            //                     </div>
-            //                 return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-            //                     <p>{message.id} - {message.content}</p>
-            //                     <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
-            //                 </div>
-            //             })}
-            //         </div>
-            //     </div>
-            //     <div className="chat-controls">
-            //         <form onSubmit={handleSendMessage} action="">
-            //             <input
-            //                 ref={fileInputRef}
-            //                 type="file"
-            //                 accept="image/*"
-            //                 name="midia"
-            //                 style={{ display: "none" }}
-            //                 onChange={handleUploadImage}
-            //             />
-            //             <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
-            //             <button className="send-picture"
-            //                 type="button"
-            //                 onClick={handleClickAttach}
-            //             ><img src="../public/attach-icon.png" alt="" />
-            //             </button>
-            //         </form>
-            //     </div>
-            // </div>
         }
     }
 
@@ -442,50 +188,6 @@ function MainPage() {
             <div className="main-page">
                 {viewChats ? (
                     <ContactsPane user={user} chatsList={sortedChatsList} selectUser={handleSelectUser} logout={handleLogout} createGroup={handleShowCreateGroup} seeUserProfile={seeUserProfile} update={update}/>
-                    // <div className="side-pane">
-                    //     <div className="logout-btn" onClick={handleLogout}>
-                    //         <div className="icon logout-icon"></div>
-                    //         <p>Log out</p>
-                    //     </div>
-                    //     <div className="main-header">
-                    //         <p className="app-title">WhatsUp</p>
-                    //         <div className="profile-btn" onClick={() => seeUserProfile(user.id)}>
-                    //             <UserPicture id={user.id} type={"NORMAL"} update={update}/>
-                    //             <p className="greetings">Hello {user.username}</p>
-                    //         </div>
-                    //         <div onClick={(e) => handleToggleSidePane()} className="new-chat-btn">
-                    //             <p>New Chat</p>
-                    //             <div className="icon new-chat-icon"></div>
-                    //         </div>
-                    //     </div>
-                    //     <div className="chats-space">
-                    //         {sortedChatsList.length > 0 ? sortedChatsList.map((chatItem) => {
-                    //             console.log(chatItem)
-                    //             if (chatItem.chatType == ChatType.GROUP)
-                    //                 return <div key={`${chatItem.chatType}-${chatItem.groupId}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
-                    //                     <UserPicture id={chatItem.groupId} type={chatItem.chatType} />
-                    //                     <div className="user-item-data">
-                    //                         <p>{chatItem.groupId} - {chatItem.username}</p>
-                    //                         {chatItem.lastMessage != null ?
-                    //                             <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
-                    //                             : <p>Group Created</p>
-                    //                         }
-                    //                         <p>{new Date(chatItem.updated_at).toLocaleString()}</p>
-                    //                     </div>
-                    //                 </div>
-                    //             return <div key={`${chatItem.chatType}-${chatItem.id}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
-                    //                 {console.log("rendering here")}
-                    //                 <UserPicture id={chatItem.id} type={chatItem.chatType} />
-                    //                 <div className="user-item-data">
-                    //                     <p>{chatItem.id} - {chatItem.username}</p>
-                    //                     <p>{chatItem.lastMessage?.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage?.content}</p>
-                    //                     <p>{new Date(chatItem.updated_at).toLocaleString()}</p>
-                    //                 </div>
-                    //             </div>
-                    //         }) : <p>No users</p>}
-                    //     </div>
-                    //     {/* <hr className="limit" /> */}
-                    // </div>
                 ) : (
                     <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} createGroup={handleShowCreateGroup} />
                 )}
@@ -496,9 +198,7 @@ function MainPage() {
 
 }
 
-
 export default MainPage;
-
 
 
 function NoChatHolder() {

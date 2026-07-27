@@ -11,7 +11,6 @@ function MidiaMessage({ midiaId, origin }) {
             const midia = await fetchMessageMidia(midiaId, origin);
             setMidia(midia.data.content?.data);
             setMime(midia.data.mime);
-
         }
         getMidia();
     }, []);

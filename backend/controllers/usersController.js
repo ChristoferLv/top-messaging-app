@@ -103,34 +103,7 @@ const updateUserProfile = [
             console.log(e);
         }
     }
-]
-
-// async function updateUserProfile(req, res) {
-//     if (!req.user) {
-//         return res.status(401).send({ success: false });
-//     }
-//     const userId = parseInt(req.user.id);
-//     const note = req.body.note;
-//     try {
-//         const user = await prisma.users.findUnique({
-//             where: { id: userId },
-//         });
-
-//         if (!user) {
-//             return res.status(400).send({ success: false });
-//         }
-
-//         const result = await prisma.users.update({
-//             where: { id: userId },
-//             data: { note: note },
-//             omit: { password: true, picture: true }
-//         })
-
-//         return res.status(200).send({ success: true, data: result });
-//     } catch (e) {
-//         console.log(e);
-//     }
-// }
+];
 
 async function getPicture(req, res) {
     if (!req.user) {

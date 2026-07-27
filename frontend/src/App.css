@@ -410,6 +410,7 @@ label {
         border-radius: 9999px;
         padding: 10px 0;
         padding-left: 25px;
+        padding-right: 80px ;
         flex-grow: 1;
         flex-shrink: 1;
         color: white;
@@ -665,7 +666,7 @@ label {
 .msg.rcvd {
     border-radius: var(--rad-sm) var(--rad) var(--rad) var(--rad-sm);
     background: #f1f1f1;
-    color: #555;
+    color: #1d1f1f;
     margin-right: auto;
 }
 

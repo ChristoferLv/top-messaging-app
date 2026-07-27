@@ -154,12 +154,6 @@ async function sendGroupMessage(req, res) {
                 )
             }
 
-
-            // const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
-            // console.log("receiver", receiver)
-            // if (result) {
-            // req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
-            // }
             if (midiaMessage) {
                 const { reducedFileRef, content } = fileRef;
                 return { ...result, midia: reducedFileRef };
@@ -167,12 +161,14 @@ async function sendGroupMessage(req, res) {
             return result;
         }
         );
+
         const receivers = await prisma.usersGroups.findMany({
             where: {
                 groupChatId: groupId
             },
             select: { userId: true }
-        })
+        });
+
         const treatedReceivers = receivers.map((receiver) => `user:${receiver.userId}`);
         req.socketIo.to(treatedReceivers).emit("olha a mensagem", "chat:" + groupId)
         return res.status(201).send({ success: true, data: sendMessageResult });

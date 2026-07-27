@@ -46,36 +46,20 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
     }, [chat])
 
     useEffect(() => {
-        console.log("socket updated", socketIO)
-        console.log("connected===", socketIO)
-
-        function test(value) {
-            console.log("TEST RECEIVED", value)
-        }
-
         function onFooEvent(value) {
-            console.log("inside on foo")
-            console.log("foor", value)
             const chatId = value.split(":")[1];
             if (chat) {
-                console.log("yes chat", chat)
-                console.log(chat.chat?.chatType, ChatType.NORMAL, chat.chat?.id, chatId, chat.chat?.id == chatId,)
-                console.log(chat.chatType == ChatType.GROUP && chat.groupId == chatId)
                 if (chat.chat?.chatType == ChatType.NORMAL && chat.chat?.id == chatId) {
-                    console.log("refetch via socket=======")
                     getMessagesOfChat();
                 }
             }
         }
 
         if (socketIO.connected) {
-            socketIO.on("test", test)
             socketIO.on('olha a mensagem', onFooEvent);
         }
         return () => {
-            console.log("cleaning up")
             if (socketIO) {
-                socketIO.off("test", test)
                 socketIO.off('olha a mensagem', onFooEvent);
             }
         };
@@ -84,7 +68,6 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
     async function handleSendMessage(e) {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
-        console.log(data)
         fileInputRef.current.value = "";
         if (data.midia.size > 5000000) {
             alert("Maximum midia size is 5MB.");
@@ -94,11 +77,10 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
         if (data.message.length < 1 && data.midia.size == 0) {
             return;
         }
-        console.log(chat)
+
         if (!chat.chat) {
             const result = await sendFirstMessage(chat.user.id, data);
             if (result) {
-                console.log("new chat data", result.data)
                 setChat(result.data);
                 fetchChats();
                 const newMessages = await fetchMessagesOfChat(result.chat.id);
@@ -107,7 +89,6 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
                 }
             }
         } else {
-            console.log("sending")
             const result = await sendMessage(chat.chat.id, data);
             if (result) {
                 const newChats = chatsList.map((newChat) => {
@@ -127,7 +108,6 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
     }
 
     function handleTypingMessage(e) {
-        console.log("typing", e.target.value)
         if (e.target.value.length > 20000) {
             alert("Maximum message length is 20000 characters.")
             return;
@@ -153,17 +133,6 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
         setSeeProfile(false);
     }
 
-    // async function handlePictureSubmit(e) {
-    //     console.log("sending picture")
-    //     e.preventDefault();
-    //     const data = Object.fromEntries(new FormData(e.target).entries());
-    //     const result = await sendPicture(data);
-    //     if (result) {
-    //         setPicture(result.data);
-    //     }
-    // }
-
-
     return (
 
         seeProfile ? <ProfilePage userId={chat.user.id} close={closeProfile} />
@@ -175,14 +144,13 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
                 </div>
                 <div className="chat-body">
                     <div className="messages-list" ref={containerRef}>
-                        {/* <p>Messages</p> */}
                         {messages && messages.map((message) => {
                             if (message.type == "MIDIA")
                                 return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
                                     <MidiaMessage midiaId={message.id} origin={ChatType.NORMAL} />
                                 </div>
                             return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                <p>{message.id} - {message.content}</p>
+                                <p>{message.content}</p>
                                 <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
                             </div>
                         })}
