@@ -41,7 +41,7 @@ function GroupChatPanel({ chat, chatsList, setChatsList, fetchChats, groupDeleti
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [messages, seeGroupDetails]);
 
     useEffect(() => {
         if (chat != null) {

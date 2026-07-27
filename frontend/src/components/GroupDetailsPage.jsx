@@ -47,7 +47,7 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
     function handleChange(e) {
         const whoChanged = event.target;
         if (whoChanged.name == "name") {
-            if (whoChanged.value.length > 40) {
+            if (whoChanged.value.length > 60) {
                 groupNameError.current.classList.remove("hidden");
                 return;
             } else {
@@ -56,7 +56,7 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
         }
 
         if (whoChanged.name == "description") {
-            if (whoChanged.value.length > 250) {
+            if (whoChanged.value.length > 300) {
                 groupDescriptionError.current.classList.remove("hidden");
                 return;
             } else {
@@ -103,7 +103,7 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
         const result = await leaveGroup(groupData.id);
         if (result.success) {
             close();
-           handleDelete();
+            handleDelete();
         }
     }
 
@@ -127,7 +127,10 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
 
     if (!groupData || !myContacts) return (<><div className="new-group-page"><p className="loading">Loading...</p></div></>)
 
+    console.log(groupData)
+
     const isOwner = groupData.creatorId == user.id;
+    const membersList = groupData.usersGroups.filter((user) => user.user.id != groupData.creatorId).map((user) => { return { id: user.user.id, username: user.user.username } });
     const groupMembers = groupData.usersGroups.map((member) => member.user.id);
     const contactsToAdd = myContacts.filter((contact) => !(groupMembers.includes(contact.contact.id)));
 
@@ -147,10 +150,10 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
                     <>
                         <label htmlFor="name">Group name</label>
                         <input id="name" type="text" name="name" value={editedGroupData.name} onChange={(e) => handleChange(e)} />
-                        <p className="error hidden" ref={groupNameError}>Group name length must be between 1 and 40 characters.</p>
+                        <p className="error hidden" ref={groupNameError}>Group name length must be between 1 and 60 characters.</p>
                         <label htmlFor="description">Description</label>
                         <input id="description" type="text" name="description" value={editedGroupData.description ?? ""} onChange={(e) => handleChange(e)} />
-                        <p className="error hidden" ref={groupDescriptionError}>Group description maximum length is 250 characters.</p>
+                        <p className="error hidden" ref={groupDescriptionError}>Group description maximum length is 300 characters.</p>
                     </>
                 )
                     : (
@@ -174,14 +177,16 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
                 {removingMembers ?
 
                     (
-                        groupData.usersGroups.map((member) => {
-                            return <ContactItem key={member.user.id}
-                                id={member.user.id}
-                                username={member.user.username}
+                        membersList.length > 0 ?
+                        membersList.map((member) => {
+                            return <ContactItem key={member.id}
+                                id={member.id}
+                                username={member.username}
                                 isMember={true}
                                 handleChangeMembers={handleChangeMembers}
                                 showControls={isOwner} />
                         })
+                        :<p>The group has no members</p>
                     ) : (
                         contactsToAdd.length > 0 ? contactsToAdd.map((contact) => {
                             return <ContactItem key={contact.contact.id}
@@ -210,7 +215,7 @@ function ContactItem({ id, username, handleChangeMembers, isMember, showControls
         <div className="group-member-item">
             <div className="member-data" onClick={(e) => { }}>
                 <UserPicture id={id} type={ChatType.NORMAL} />
-                <p>{username}</p>
+                <p className="member-username">{username}</p>
             </div>
 
             {showControls && <div className="member-controls">

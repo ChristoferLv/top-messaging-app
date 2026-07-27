@@ -6,13 +6,14 @@ import { AuthContext } from "../AuthContext";
 import { fetchMessagesOfChat, sendFirstMessage, sendMessage, sendPicture, } from "../api/requests";
 import MidiaMessage from "./MidiaMessage";
 import socketIO from "../socket";
+import ProfilePage from "./Profile";
 
 function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
     const { user, isLoading } = useContext(AuthContext);
-    const [seeGroupDetails, setSeeGroupDetails] = useState(false);
     const containerRef = useRef(null);
     const [typingMessage, setTypingMessage] = useState("");
     const [messages, setMessages] = useState([]);
+    const [seeProfile, setSeeProfile] = useState(false);
 
     const getMessagesOfChat = useCallback(async () => {
         try {
@@ -30,15 +31,11 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
         }
     }, [chat]);
 
-    function closeGroupDetails() {
-        setSeeGroupDetails(false);
-    }
-
     useEffect(() => {
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [messages, seeProfile]);
 
     useEffect(() => {
         if (chat != null) {
@@ -148,6 +145,14 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
         e.target.parentElement.requestSubmit();
     }
 
+    function seeUserProfile() {
+        setSeeProfile(true);
+    }
+
+    function closeProfile() {
+        setSeeProfile(false);
+    }
+
     // async function handlePictureSubmit(e) {
     //     console.log("sending picture")
     //     e.preventDefault();
@@ -161,45 +166,48 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
 
     return (
 
-        <div className="chat-pane">
-            <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
-                <UserPicture id={chat.user.id} type={chat.chatType} />
-                <p>{chat.user.username}</p>
-            </div>
-            <div className="chat-body">
-                <div className="messages-list" ref={containerRef}>
-                    {/* <p>Messages</p> */}
-                    {messages && messages.map((message) => {
-                        if (message.type == "MIDIA")
+        seeProfile ? <ProfilePage userId={chat.user.id} close={closeProfile} />
+            :
+            <div className="chat-pane">
+                <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
+                    <UserPicture id={chat.user.id} type={chat.chatType} />
+                    <p>{chat.user.username}</p>
+                </div>
+                <div className="chat-body">
+                    <div className="messages-list" ref={containerRef}>
+                        {/* <p>Messages</p> */}
+                        {messages && messages.map((message) => {
+                            if (message.type == "MIDIA")
+                                return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                                    <MidiaMessage midiaId={message.id} origin={ChatType.NORMAL} />
+                                </div>
                             return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                <MidiaMessage midiaId={message.id} origin={ChatType.NORMAL} />
+                                <p>{message.id} - {message.content}</p>
+                                <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
                             </div>
-                        return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                            <p>{message.id} - {message.content}</p>
-                            <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
-                        </div>
-                    })}
+                        })}
+                    </div>
+                </div>
+                <div className="chat-controls">
+                    <form onSubmit={handleSendMessage} action="">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            name="midia"
+                            style={{ display: "none" }}
+                            onChange={handleUploadImage}
+                        />
+                        <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
+                        <button className="send-picture"
+                            type="button"
+                            onClick={handleClickAttach}
+                        ><img src="../public/attach-icon.png" alt="" />
+                        </button>
+                    </form>
                 </div>
             </div>
-            <div className="chat-controls">
-                <form onSubmit={handleSendMessage} action="">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        name="midia"
-                        style={{ display: "none" }}
-                        onChange={handleUploadImage}
-                    />
-                    <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
-                    <button className="send-picture"
-                        type="button"
-                        onClick={handleClickAttach}
-                    ><img src="../public/attach-icon.png" alt="" />
-                    </button>
-                </form>
-            </div>
-        </div>
+
     );
 }
 

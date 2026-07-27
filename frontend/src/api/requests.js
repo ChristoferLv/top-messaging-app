@@ -409,7 +409,6 @@ async function deleteGroup(groupId) {
 
 
 async function findUserWithUsername(username) {
-    console.log("Search for", username)
     try {
         const token = localStorage.getItem("token");
         const request = await fetch("http://localhost:3000/users/find/" + username, {
@@ -423,6 +422,8 @@ async function findUserWithUsername(username) {
         if (request.ok) {
             const user = await request.json();
             return user;
+        } else {
+            return { success: false }
         }
     } catch (e) {
         console.log(e);
@@ -510,6 +511,9 @@ async function addContact(contactId) {
         if (request.ok) {
             const contact = await request.json();
             return contact;
+        } else if (request.status == 400) {
+            const result = await request.json();
+            return { success: false, message: result.message }
         }
     } catch (e) {
         console.log(e);

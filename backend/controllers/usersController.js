@@ -36,7 +36,7 @@ async function findUserByUsername(req, res) {
         });
 
         if (!user)
-            return res.status(200).send({ success: false, data: null })
+            return res.status(400).send({ success: false, message:"No contact found with requested username." })
 
         res.status(200).send({ success: true, data: user });
     } catch (e) {

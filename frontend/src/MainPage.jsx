@@ -118,8 +118,8 @@ function MainPage() {
         }
 
         if (socket) {
-            socket.on('connect', onConnect);
-            socket.on('disconnect', onDisconnect);
+            // socket.on('connect', onConnect);
+            // socket.on('disconnect', onDisconnect);
             socket.on("test", test)
             socket.on('olha a mensagem', onFooEvent);
         }
@@ -127,8 +127,8 @@ function MainPage() {
             console.log("cleaning up")
             if (socket) {
                 socket.off("test", test)
-                socket.off('connect', onConnect);
-                socket.off('disconnect', onDisconnect);
+                // socket.off('connect', onConnect);
+                // socket.off('disconnect', onDisconnect);
                 socket.off('olha a mensagem', onFooEvent);
             }
         };
@@ -448,7 +448,7 @@ function MainPage() {
                             <p className="app-title">WhatsUp</p>
                             <div className="profile-btn" onClick={() => seeUserProfile(user.id)}>
                                 <UserPicture id={user.id} type={"NORMAL"} />
-                                <p>Olá {user.username}</p>
+                                <p className="greetings">Hello {user.username}</p>
                             </div>
                             <div onClick={(e) => handleToggleSidePane()} className="new-chat-btn">
                                 <p>New Chat</p>
@@ -467,7 +467,7 @@ function MainPage() {
                                                 <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
                                                 : <p>Group Created</p>
                                             }
-                                            <p>{new Date(chatItem.updated_at).toISOString()}</p>
+                                            <p>{new Date(chatItem.updated_at).toLocaleString()}</p>
                                         </div>
                                     </div>
                                 return <div key={`${chatItem.chatType}-${chatItem.id}`} className="user-item" onClick={(e) => handleSelectUser(chatItem)}>
@@ -475,7 +475,7 @@ function MainPage() {
                                     <div className="user-item-data">
                                         <p>{chatItem.id} - {chatItem.username}</p>
                                         <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
-                                        <p>{new Date(chatItem.updated_at).toISOString()}</p>
+                                        <p>{new Date(chatItem.updated_at).toLocaleString()}</p>
                                     </div>
                                 </div>
                             }) : <p>No users</p>}

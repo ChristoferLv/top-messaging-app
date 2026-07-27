@@ -6,10 +6,10 @@ const validateGroup = [
     body("name")
         .trim()
         .isLength({ min: 1 }).withMessage("The minimum group name length is 1 character.")
-        .isLength({ max: 40 }).withMessage("The maximum message length is 40 characters."),
+        .isLength({ max: 60 }).withMessage("The maximum message length is 60 characters."),
     body("description")
         .trim()
-        .isLength({ max: 250 }).withMessage("The maximum group description length is 250 characters."),
+        .isLength({ max: 300 }).withMessage("The maximum group description length is 300 characters."),
 
 ];
 

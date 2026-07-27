@@ -63,7 +63,7 @@ function ProfilePage({ userId, close }) {
     function handleChange(e) {
         const whoChanged = event.target;
         if (whoChanged.name == "note") {
-            if (whoChanged.value.length > 200) {
+            if (whoChanged.value.length > 120) {
                 errorMessage.current.classList.remove("hidden")
                 return;
             } else {
@@ -114,7 +114,7 @@ function ProfilePage({ userId, close }) {
                 {isEditing ? (
                     <>
                         <input className="profile-note-input" type="text" name="note" value={editedProfile.note} onChange={(e) => handleChange(e)} />
-                        <p ref={errorMessage} className="hidden error">Maximum note length is 200 characters</p>
+                        <p ref={errorMessage} className="hidden error">Maximum note length is 120 characters</p>
                     </>
                 )
                     : (

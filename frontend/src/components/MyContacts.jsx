@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { addContact, findUserWithUsername, getMyContacts } from "../api/requests";
+import { ChatType } from "../defaults";
+import UserPicture from "./UserPicture";
 
 async function loadContacts() {
     const contacts = await getMyContacts();
@@ -14,6 +16,7 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
     const [foundContact, setFoundContact] = useState(null);
     const [contactSearched, setContactSearched] = useState(false);
     const [searchedUsername, setSearchedUsername] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         async function fetchMyContacts() {
@@ -31,6 +34,7 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
     async function hadleSearchContact(e) {
         e.preventDefault();
         setSearchedUsername(searchUsername);
+        setErrorMessage(false);
         const contact = await findUserWithUsername(searchUsername);
         console.log(contact)
         if (contact.success) {
@@ -48,6 +52,8 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
         if (result.success) {
             const contacts = await loadContacts();
             setContactsList(contacts);
+        }else{
+            setErrorMessage(result.message)
         }
     }
 
@@ -69,13 +75,19 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
                     <form onSubmit={hadleSearchContact}>
                         <label htmlFor="">Contact Username</label>
                         <input id="username" type="text" placeholder="Username" onChange={hadleUsername} value={searchUsername} />
-                        <button type="submit">Search User</button>
+                        <button className="search-contact-btn" type="submit">Search User</button>
                     </form>
                     <div className="found-contact">
                         {contactSearched && foundContact && <>
                             <div className="add-contact">
-                                <p>Found User: {foundContact.username}</p>
-                                <button onClick={handleAddContact}>Add to contact list</button>
+                                <div className="user-item">
+                                    <UserPicture id={foundContact.id} type={ChatType.NORMAL} />
+                                    <div className="user-item-data">
+                                    <p>Found User: {foundContact.username}</p>
+                                    </div>
+                                </div>
+                                <p className="contact-error">{errorMessage}</p>
+                                <button className="add-contact-btn" onClick={handleAddContact}>Add to contact list</button>
                             </div>
                         </>
                         }
@@ -87,8 +99,11 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
                 </div>
 
                 {contactsList.length > 0 ? contactsList.map((contact) => {
-                    return <div key={contact.contact.id} className="user-item" onClick={(e) => { selectUser(contact.contact) }}>
-                        <p>{contact.contact.id} - {contact.contact.username}</p>
+                    return <div key={contact.contact.id} className="user-item" onClick={(e) => selectUser(contact.contact)}>
+                        <UserPicture id={contact.contact.id} type={ChatType.NORMAL} />
+                        <div className="user-item-data">
+                            <p>{contact.contact.id} - {contact.contact.username}</p>
+                        </div>
                     </div>
                 }) : <p>No contacts</p>}
             </div>

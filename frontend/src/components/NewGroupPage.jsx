@@ -70,10 +70,10 @@ function NewGroupPage({ close, refetchChats }) {
             <div className="new-group-controls">
                 <label htmlFor="name">Group name*</label>
                 <input id="name" type="text" name="name" value={groupData.name} onChange={(e) => handleChange(e)} />
-                <p className="error hidden" ref={groupNameError}>Group name length must be between 1 and 40 characters.</p>
+                <p className="error hidden" ref={groupNameError}>Group name length must be between 1 and 60 characters.</p>
                 <label htmlFor="description">Description</label>
                 <input id="description" type="text" name="description" value={groupData.description} onChange={(e) => handleChange(e)} />
-                <p className="error hidden" ref={groupDescriptionError}>Group description maximum length is 250 characters.</p>
+                <p className="error hidden" ref={groupDescriptionError}>Group description maximum length is 300 characters.</p>
                 <button className="create-group-btn" onClick={handleCreateGroup}>Create</button>
                 <p className="members-selection">Members selection</p>
                 {myContacts.length > 0 ? myContacts.map((contact) => {
