@@ -21,7 +21,7 @@ function UserPicture({ id, type, update }) {
             }
         }
         getPicture();
-    }, [update])
+    }, [update, id])
 
     useEffect(() => {
         return () => {
