@@ -8,7 +8,7 @@ function ProfilePage({ userId, close }) {
     const fileInputRef = useRef(null);
     const errorMessage = useRef(null);
     const [pictureB64, setPicture] = useState(null);
-    const [mime, picture] = pictureB64 ? pictureB64.split(":") : [null, null];
+    const [mime, setMime] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
     const [editedProfile, setEditedProfile] = useState(null);
@@ -17,7 +17,8 @@ function ProfilePage({ userId, close }) {
         async function getPicture() {
             if (profile) {
                 const picture = await fetchPicture(profile.id);
-                setPicture(picture.data);
+                setPicture(picture.data.buffer?.data);
+                setMime(picture.data.mime);
             }
         }
         getPicture();
@@ -26,7 +27,6 @@ function ProfilePage({ userId, close }) {
     useEffect(() => {
         async function getProfile() {
             const profile = await findUserById(userId);
-            console.log(profile)
             setProfile(profile.data);
         }
         getProfile();
@@ -51,7 +51,7 @@ function ProfilePage({ userId, close }) {
 
         const result = await sendPicture(data);
         if (result.success) {
-            setPicture(result.data);
+            setPicture(result.data.data);
         }
     }
 
@@ -82,6 +82,10 @@ function ProfilePage({ userId, close }) {
         }
     }
 
+    const rawBuffer = new Uint8Array(pictureB64);
+    const blob = new Blob([rawBuffer], { type: mime });
+    const imageUrl = URL.createObjectURL(blob);
+
     if (!profile) return <div className="profile-page"><p className="loading">Loading...</p></div>
 
     return (<>
@@ -108,7 +112,7 @@ function ProfilePage({ userId, close }) {
                     className="profile-pic" onClick={handleClickImage}
                 >
                     <img src={!pictureB64 ? "../public/avatar.png" :
-                        `data:${mime};base64,${picture}`} alt="" />
+                        imageUrl} alt="" />
                 </div>
                 <p className="profile-username">{profile.username}</p>
                 {isEditing ? (

@@ -36,7 +36,7 @@ async function findUserByUsername(req, res) {
         });
 
         if (!user)
-            return res.status(400).send({ success: false, message:"No contact found with requested username." })
+            return res.status(400).send({ success: false, message: "No contact found with requested username." })
 
         res.status(200).send({ success: true, data: user });
     } catch (e) {
@@ -139,9 +139,13 @@ async function getPicture(req, res) {
 
     const userId = parseInt(req.params.userId);
     const result = await prisma.users.findUnique(
-        { where: { id: userId }, select: { picture: true } }
+        { where: { id: userId }, select: { picture: true, mime:true } }
     );
-    res.status(200).send({ success: true, data: result.picture });
+    let newbuffer = null;
+    if (result.picture)
+        newbuffer = Buffer.from(result.picture, result.picture.byteOffset, result.picture.byteLength)
+
+    res.status(200).send({ success: true, data: { buffer: newbuffer, mime: result.mime } });
 }
 
 async function uploadPicture(req, res) {
@@ -160,11 +164,14 @@ async function uploadPicture(req, res) {
 
         const result = await prisma.users.update(
             {
-                data: { picture: `${mime}:${content}` },
+                data: { picture: req.file.buffer, mime: mime },
                 where: { id: userId }
             }
         );
-        return res.status(201).send({ success: true, data: result.picture });
+        let newbuffer = null;
+        if (result.picture)
+            newbuffer = Buffer.from(result.picture, result.picture.byteOffset, result.picture.byteLength)
+        return res.status(201).send({ success: true, data: newbuffer });
     } catch (e) {
         console.log(e);
         return res.status(500).send({ success: false });
