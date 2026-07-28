@@ -8,7 +8,7 @@ import MidiaMessage from "./MidiaMessage";
 import socketIO from "../socket";
 import ProfilePage from "./Profile";
 
-function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
+function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats, setChat }) {
     const { user, isLoading } = useContext(AuthContext);
     const containerRef = useRef(null);
     const [typingMessage, setTypingMessage] = useState("");
@@ -49,11 +49,12 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
     }, [messages, seeProfile]);
 
     useEffect(() => {
+        setMessages(null);
         if (chat != null) {
             getMessagesOfChat();
         }
         setTypingMessage("");
-    }, [chat])
+    }, [chat.user.id])
 
     useEffect(() => {
         function newMessageEvent(value) {
@@ -73,7 +74,7 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
                 socketIO.off('new-message', newMessageEvent);
             }
         };
-    }, [chat]);
+    }, [chat.user.id]);
 
     async function handleSendMessage(e) {
         e.preventDefault();
@@ -93,7 +94,8 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
             if (result) {
                 setChat(result.data);
                 fetchChats();
-                const newMessages = await fetchMessagesOfChat(result.chat.id);
+                console.log(result)
+                const newMessages = await fetchMessagesOfChat(result.data.chat.id);
                 if (newMessages) {
                     setMessages(newMessages.data);
                 }

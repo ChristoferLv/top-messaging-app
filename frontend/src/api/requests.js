@@ -1,28 +1,5 @@
 const BASE_URL = "http://localhost:3000"
 
-async function checkTokenExpired() {
-    const token = localStorage.getItem("token");
-    try {
-        const rawResponse = await fetch('http://localhost:3000/auth/check', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': token
-            }
-        });
-        if (rawResponse.status == 401) {
-            return false;
-        } else if (rawResponse.status == 200) {
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
-
 async function logOut() {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
@@ -633,7 +610,6 @@ async function fetchMessageMidia(midiaId, origin) {
 
 
 export {
-    checkTokenExpired,
     login,
     logOut,
     getMe,

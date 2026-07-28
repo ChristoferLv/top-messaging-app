@@ -175,6 +175,7 @@ label {
     height: 100%;
     margin-top: 10px;
     margin-bottom: 55px;
+    padding-right: 5px;
     /* height: calc(100% - 300px); */
     overflow-y: scroll;
     border-bottom: #555 solid 2px;
@@ -338,6 +339,10 @@ label {
     button:hover {
         background-color: #d3d3d3;
     }
+}
+
+.search-contact-btn {
+    margin-bottom: 10px;
 }
 
 .add-contact-btn {
@@ -668,6 +673,7 @@ label {
 }
 
 .message-time {
+    margin-top: 2px;
     font-size: 10px;
     align-self: flex-end;
 }

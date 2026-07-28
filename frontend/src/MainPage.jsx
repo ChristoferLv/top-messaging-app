@@ -30,7 +30,7 @@ function MainPage() {
 
     const sortedChatsList = chatsList.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
-    const [viewChats, setViewChats] = useState(true);
+    // const [viewChats, setViewChats] = useState(true);
     const [showProfile, setshowProfile] = useState(-1);
     const [createGroup, setCteateGroup] = useState(false);
 
@@ -97,7 +97,7 @@ function MainPage() {
             setChatsList(newChatsList);
             if (chat) {
                 if (chat.user.id == value.id) {
-                    setChat({...chat, user:{...chat.user, isOnline:value.status}})
+                    setChat({ ...chat, user: { ...chat.user, isOnline: value.status } })
                 }
             }
         }
@@ -128,10 +128,11 @@ function MainPage() {
     }, []);
 
     async function handleSelectUser(newChat) {
+        console.log("selected user")
         setMessages(null);
         // setSeeGroup(-1);
         setshowProfile(-1);
-        setViewChats(true);
+        // setViewChats(true);
         setCteateGroup(false);
         if (newChat.chatType == "GROUP") {
             setMessages(messages);
@@ -139,13 +140,13 @@ function MainPage() {
             return;
         }
         const chatExistsData = await checkChatWith(newChat.id);
-
+        console.log(chatExistsData)
         setChat(chatExistsData.data);
     }
 
-    function handleToggleSidePane() {
-        setViewChats(c => !c);
-    }
+    // function handleToggleSidePane() {
+    //     // setViewChats(c => !c);
+    // }
 
     function handleShowCreateGroup() {
         setCteateGroup(c => !c);
@@ -169,9 +170,9 @@ function MainPage() {
         setshowProfile(-1);
     }
 
-    async function seeGroupDetails(groupId) {
-        setSeeGroup(groupId);
-    }
+    // async function seeGroupDetails(groupId) {
+    //     setSeeGroup(groupId);
+    // }
 
     async function closeGroupDetails() {
         setSeeGroup(-1);
@@ -196,18 +197,14 @@ function MainPage() {
         if (chat.chatType == "GROUP") {
             mainPane = <GroupChatPanel chat={chat} fetchChats={fetchChats} chatsList={chatsList} setChatsList={setChatsList} groupDeletion={groupDeletion} groupId={chat.groupId} messages={messages} setUpdate={setUpdate} />
         } else {
-            mainPane = <NormalChatPanel chat={chat} chatsList={chatsList} fetchChats={fetchChats} setChatsList={setChatsList} />
+            mainPane = <NormalChatPanel chat={chat} chatsList={chatsList} fetchChats={fetchChats} setChatsList={setChatsList} setChat={setChat} />
         }
     }
 
     return (
         <>
             <div className="main-page">
-                {viewChats ? (
-                    <ContactsPane user={user} chatsList={sortedChatsList} selectUser={handleSelectUser} logout={handleLogout} createGroup={handleShowCreateGroup} seeUserProfile={seeUserProfile} update={update} />
-                ) : (
-                    <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} createGroup={handleShowCreateGroup} />
-                )}
+                <ContactsPane user={user} chatsList={sortedChatsList} selectUser={handleSelectUser} logout={handleLogout} createGroup={handleShowCreateGroup} seeUserProfile={seeUserProfile} update={update} />
                 {mainPane}
             </div >
         </>

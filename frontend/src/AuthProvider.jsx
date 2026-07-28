@@ -1,7 +1,14 @@
 import { use, useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { useNavigate } from "react-router";
-import { checkTokenExpired, getMe } from "./api/requests";
+import { getMe, logOut } from "./api/requests";
+
+function getJwtExpiration(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const payload = JSON.parse(atob(base64));
+  return payload.exp
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -10,35 +17,41 @@ export function AuthProvider({ children }) {
     const storagedUser = localStorage.getItem('user');
     const storagedToken = localStorage.getItem('token');
     if (storagedToken) {
-      checkTokenExpired().then((data) => {
-        if (!data) {
-          localStorage.setItem("user", null);
-          localStorage.setItem("token", null);
+      let timerId = null;
+      const exp = getJwtExpiration(storagedToken);
+      const expirationTime = exp * 1000;
+      const timeUntilExpiry = expirationTime - Date.now();
+      if (timeUntilExpiry > 0) {
+        timerId = setTimeout(() => {
+          logOut();
+        }, timeUntilExpiry);
+      } else {
+        logOut();
+        return;
+      }
+
+      if (user) {
+        setIsLoading(false);
+      }
+      if (!user) {
+        if (storagedUser) {
+          setUser(JSON.parse(storagedUser));
           setIsLoading(false);
-          setUser(false);
-          return;
-        }
-        if (user) {
+        } else if (storagedToken) {
+          getMe()
+            .then((meResult) => {
+              const user = meResult.data;
+              localStorage.setItem("user", JSON.stringify(user));
+              setUser(user);
+              setIsLoading(false);
+            });
+        } else {
+          setUser(null)
           setIsLoading(false);
         }
-        if (!user) {
-          if (storagedUser) {
-            setUser(JSON.parse(storagedUser));
-            setIsLoading(false);
-          } else if (storagedToken) {
-            getMe()
-              .then((meResult) => {
-                const user = meResult.data;
-                localStorage.setItem("user", JSON.stringify(user));
-                setUser(user);
-                setIsLoading(false);
-              });
-          } else {
-            setUser(null)
-            setIsLoading(false);
-          }
-        }
-      })
+      }
+      return () => clearTimeout(timerId);
+
     } else {
       setUser(null)
       setIsLoading(false);
