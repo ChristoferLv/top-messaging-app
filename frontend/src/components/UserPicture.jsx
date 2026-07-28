@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchPicture, getGroupPicture } from "../api/requests";
 
-function UserPicture({ id, type, update }) {
+function UserPicture({ id, type, update, isOnline }) {
     const [pictureBuff, setPicture] = useState(null);
     const [mime, setMime] = useState(null);
     const rawBuffer = new Uint8Array(pictureBuff);
@@ -28,12 +28,15 @@ function UserPicture({ id, type, update }) {
             if (imageUrl) URL.revokeObjectURL(imageUrl);
         }
     }, [])
-    
+
     return (
         <>
-            <div className="profile-pic user-mini-picture">
-                <img src={!pictureBuff ? "../public/avatar.png" :
-                    imageUrl} alt="" />
+            <div className="pic-container">
+                {isOnline && <div className="status-dot"></div>}
+                <div className="profile-pic user-mini-picture">
+                    <img src={!pictureBuff ? "../public/avatar.png" :
+                        imageUrl} alt="" />
+                </div>
             </div>
         </>
     );

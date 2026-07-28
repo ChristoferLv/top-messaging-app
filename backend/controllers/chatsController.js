@@ -77,11 +77,11 @@ async function listMyChats(req, res) {
     try {
         const userId = req.user.id;
         const chats = await prisma.$queryRaw`
-        SELECT "Chats".id as "chatId", updated_at, sender.id as "id", sender.username, 'NORMAL' as "chatType"
+        SELECT "Chats".id as "chatId", updated_at, sender.id as "id", sender.username, 'NORMAL' as "chatType", sender."isOnline"
         FROM "Chats"
         INNER JOIN "Users" as sender ON "Chats"."senderId" = ${userId} AND sender.id = "Chats"."recipientId"
         UNION
-        SELECT "Chats".id as "chatId", updated_at, receiver.id as "id", receiver.username, 'NORMAL' as "chatType"
+        SELECT "Chats".id as "chatId", updated_at, receiver.id as "id", receiver.username, 'NORMAL' as "chatType", receiver."isOnline"
         FROM "Chats"
         INNER JOIN "Users" as receiver ON "Chats"."recipientId" = ${userId} AND receiver.id = "Chats"."senderId"
         

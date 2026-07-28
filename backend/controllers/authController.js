@@ -64,12 +64,54 @@ async function login(req, res) {
             return res.status(401).json({ success: false, message: "Wrong credentials" });
         }
 
+        const goOnline = await prisma.users.update({
+            where: { id: user.id },
+            data: { isOnline: true }
+        });
+
+        if (!goOnline) {
+            return res.status(500).send({ success: false });
+        }
+
         const payload = { id: user.id, username: user.username };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         return res.status(200).json({
             success: true,
             token: `Bearer ${token}`
+        });
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+async function logOut(req, res) {
+    if (!req.user) {
+        return res.status(500).json({ success: false });
+    }
+
+    const userId = req.user.id;
+
+    try {
+        const user = await prisma.users.findUnique(
+            { where: { id: userId } }
+        );
+
+        if (!user) {
+            return res.status(500).json({ success: false });
+        }
+
+        const goOffline = await prisma.users.update({
+            where: { id: user.id },
+            data: { isOnline: false }
+        });
+
+        if (!goOffline) {
+            return res.status(500).send({ success: false });
+        }
+
+        return res.status(200).json({
+            success: true,
         });
     } catch (err) {
         console.log(err)
@@ -102,11 +144,13 @@ const register = [
             return res.status(500).send({ success: false });
         }
     }
-]
+];
+
 
 export {
     checkToken,
     getMe,
     login,
+    logOut,
     register,
 }

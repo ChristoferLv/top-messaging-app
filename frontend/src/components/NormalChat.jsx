@@ -153,7 +153,7 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
             :
             <div className="chat-pane">
                 <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
-                    <UserPicture id={chat.user.id} type={chat.chatType} />
+                    <UserPicture id={chat.user.id} type={chat.chatType} isOnline={chat.user.isOnline}/>
                     <p>{chat.user.username}</p>
                 </div>
                 <div className="chat-body">

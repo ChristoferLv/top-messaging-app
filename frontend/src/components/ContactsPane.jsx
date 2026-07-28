@@ -45,7 +45,6 @@ function ContactsPane({ user, chatsList, logout, update, selectUser, createGroup
                 </div>
                 <div className="chats-space">
                     {chatsList.length > 0 ? chatsList.map((chatItem) => {
-                        console.log(chatItem)
                         if (chatItem.chatType == ChatType.GROUP)
                             return <div key={`${chatItem.chatType}-${chatItem.groupId}`} className="user-item" onClick={(e) => selectUser(chatItem)}>
                                 <UserPicture id={chatItem.groupId} type={chatItem.chatType} />
@@ -60,7 +59,7 @@ function ContactsPane({ user, chatsList, logout, update, selectUser, createGroup
                             </div>
                         return <div key={`${chatItem.chatType}-${chatItem.id}`} className="user-item" onClick={(e) => selectUser(chatItem)}>
                             {console.log("rendering here")}
-                            <UserPicture id={chatItem.id} type={chatItem.chatType} />
+                            <UserPicture id={chatItem.id} type={chatItem.chatType} isOnline={chatItem.isOnline}/>
                             <div className="user-item-data">
                                 <p>{chatItem.id} - {chatItem.username}</p>
                                 <p>{chatItem.lastMessage?.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage?.content}</p>

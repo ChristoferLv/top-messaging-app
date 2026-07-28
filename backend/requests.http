@@ -1,4 +1,4 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc4NTEwNzkwMCwiZXhwIjoxNzg1MTk0MzAwfQ.tPb2eQwKkHez0-x6sBSR1S4-DPXU-ihfJadCkYgiMCQ
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc4NTE5MjM2OCwiZXhwIjoxNzg1Mjc4NzY4fQ.PQ4YxmOyqCPtbTfH0dRFXB4AyP3alhMK2JGOQ2v14g4
 
 GET http://localhost:3000/auth/check
 content-type: application/json
@@ -24,6 +24,11 @@ content-type: application/json
     "username":"user2",
     "password":"pass"
 }
+
+###
+
+POST http://localhost:3000/auth/logout
+Authorization: {{token}}
 
 ###
 
@@ -82,7 +87,7 @@ content-type: application/json
 Authorization: {{token}}
 
 {
-    "message":"UEPA11"
+    "message":"How r u"
 }
 
 ###
@@ -125,7 +130,7 @@ content-type: application/json
 Authorization: {{token}}
 
 {
-    "message":"Group Message2"
+    "message":"Group Message5"
 }
 
 ###

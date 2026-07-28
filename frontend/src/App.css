@@ -852,8 +852,13 @@ dialog {
     padding: 20px;
 }
 
-.profile-pic {
+.pic-container{
     position: relative;
+}
+
+
+.profile-pic {
+    /* position: relative; */
     display: inline-block;
     width: 200px;
     height: 200px;
@@ -893,6 +898,18 @@ dialog {
 .user-mini-picture:hover {
     transform: none;
 }
+
+
+.status-dot{
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: green;
+    border-radius: 99px;
+    right: 2px;
+    bottom: 3px;
+}
+
 
 .profile-username {
     margin: 0;
