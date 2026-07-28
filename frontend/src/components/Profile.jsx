@@ -52,7 +52,7 @@ function ProfilePage({ userId, close, setUpdate }) {
         const result = await sendPicture(data);
         if (result.success) {
             setPicture(result.data.data);
-            setUpdate(c => c+1)
+            setUpdate(c => c + 1)
         }
     }
 

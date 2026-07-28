@@ -20,9 +20,9 @@ function ContactsPane({ user, chatsList, logout, update, selectUser, createGroup
         createGroup();
     }
 
-    useEffect(() => {
+    // useEffect(() => {
 
-    }, update)
+    // }, update)
 
     return (
         sidePane ? <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelecUser} createGroup={handleCreateGroup} />
@@ -47,7 +47,7 @@ function ContactsPane({ user, chatsList, logout, update, selectUser, createGroup
                     {chatsList.length > 0 ? chatsList.map((chatItem) => {
                         if (chatItem.chatType == ChatType.GROUP)
                             return <div key={`${chatItem.chatType}-${chatItem.groupId}`} className="user-item" onClick={(e) => selectUser(chatItem)}>
-                                <UserPicture id={chatItem.groupId} type={chatItem.chatType} />
+                                <UserPicture id={chatItem.groupId} type={chatItem.chatType} update={update}/>
                                 <div className="user-item-data">
                                     <p>{chatItem.groupId} - {chatItem.username}</p>
                                     {chatItem.lastMessage != null ?
@@ -58,7 +58,6 @@ function ContactsPane({ user, chatsList, logout, update, selectUser, createGroup
                                 </div>
                             </div>
                         return <div key={`${chatItem.chatType}-${chatItem.id}`} className="user-item" onClick={(e) => selectUser(chatItem)}>
-                            {console.log("rendering here")}
                             <UserPicture id={chatItem.id} type={chatItem.chatType} isOnline={chatItem.isOnline}/>
                             <div className="user-item-data">
                                 <p>{chatItem.id} - {chatItem.username}</p>

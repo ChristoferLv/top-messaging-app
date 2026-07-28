@@ -17,7 +17,6 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
 
     const getMessagesOfChat = useCallback(async () => {
         try {
-            console.log("chatt", chat)
             if (chat != null) {
                 if (chat.chat != null) {
                     const messages = await fetchMessagesOfChat(chat.chat.id);
@@ -38,8 +37,6 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
                 const form = event.target.closest('form');
                 if (form) {
                     form.requestSubmit();
-                } else {
-                    console.log("Submit action triggered: ", event.target.value);
                 }
             }
         }
@@ -53,14 +50,13 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
 
     useEffect(() => {
         if (chat != null) {
-            console.log("get the messages")
             getMessagesOfChat();
         }
         setTypingMessage("");
     }, [chat])
 
     useEffect(() => {
-        function onFooEvent(value) {
+        function newMessageEvent(value) {
             const chatId = value.split(":")[1];
             if (chat) {
                 if (chat.chat?.chatType == ChatType.NORMAL && chat.chat?.id == chatId) {
@@ -70,11 +66,11 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
         }
 
         if (socketIO.connected) {
-            socketIO.on('olha a mensagem', onFooEvent);
+            socketIO.on('new-message', newMessageEvent);
         }
         return () => {
             if (socketIO) {
-                socketIO.off('olha a mensagem', onFooEvent);
+                socketIO.off('new-message', newMessageEvent);
             }
         };
     }, [chat]);

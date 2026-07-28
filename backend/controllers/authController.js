@@ -73,6 +73,15 @@ async function login(req, res) {
             return res.status(500).send({ success: false });
         }
 
+        const meOnContacts = await prisma.contacts.findMany({
+            where: { contactId: user.id },
+            select: { contactOwnerId: true }
+        });
+
+        const meOnContactsIds = meOnContacts.map((item) => `user:${item.contactOwnerId}`);
+        if (meOnContacts.length > 0)
+            req.socketIo.to(meOnContactsIds).emit("update-status", { id: user.id, status: true });
+
         const payload = { id: user.id, username: user.username };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
 
@@ -109,6 +118,15 @@ async function logOut(req, res) {
         if (!goOffline) {
             return res.status(500).send({ success: false });
         }
+
+        const meOnContacts = await prisma.contacts.findMany({
+            where: { contactId: user.id },
+            select: { contactOwnerId: true }
+        });
+
+        const meOnContactsIds = meOnContacts.map((item) => `user:${item.contactOwnerId}`);
+        if (meOnContacts.length > 0)
+            req.socketIo.to(meOnContactsIds).emit("update-status", { id: user.id, status: false });
 
         return res.status(200).json({
             success: true,

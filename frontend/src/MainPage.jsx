@@ -18,14 +18,14 @@ import ContactsPane from "./components/ContactsPane";
 
 function MainPage() {
     const [socket, setSocket] = useState(null);
-    const [usersList, setUsersList] = useState([]);
+    // const [usersList, setUsersList] = useState([]);
     const [chatsList, setChatsList] = useState([]);
-    const [typingMessage, setTypingMessage] = useState("");
+    // const [typingMessage, setTypingMessage] = useState("");
     const { user, isLoading } = useContext(AuthContext);
-    const containerRef = useRef(null);
+    // const containerRef = useRef(null);
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [seeGroup, setSeeGroup] = useState(-1);
+    // const [seeGroup, setSeeGroup] = useState(-1);
     const [update, setUpdate] = useState(0);
 
     const sortedChatsList = chatsList.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
@@ -83,19 +83,36 @@ function MainPage() {
     }, []);
 
     useEffect(() => {
-        function onFooEvent(value) {
+        function newMessageEvent(value) {
             fetchChats();
         }
 
+        function updateStatusEvent(value) {
+            const newChatsList = chatsList.map((chatItem) => {
+                if (chatItem.chatType == ChatType.NORMAL && chatItem.id == value.id) {
+                    return { ...chatItem, isOnline: value.status };
+                }
+                return chatItem;
+            });
+            setChatsList(newChatsList);
+            if (chat) {
+                if (chat.user.id == value.id) {
+                    setChat({...chat, user:{...chat.user, isOnline:value.status}})
+                }
+            }
+        }
+
         if (socket) {
-            socket.on('olha a mensagem', onFooEvent);
+            socket.on('new-message', newMessageEvent);
+            socket.on('update-status', updateStatusEvent);
         }
         return () => {
             if (socket) {
-                socket.off('olha a mensagem', onFooEvent);
+                socket.off('new-message', newMessageEvent);
+                socket.off('update-status', updateStatusEvent);
             }
         };
-    }, [socket, chat]);
+    }, [socket, chat, chatsList]);
 
     useEffect(() => {
         if (user && !isLoading) {
@@ -112,7 +129,7 @@ function MainPage() {
 
     async function handleSelectUser(newChat) {
         setMessages(null);
-        setSeeGroup(-1);
+        // setSeeGroup(-1);
         setshowProfile(-1);
         setViewChats(true);
         setCteateGroup(false);
@@ -143,7 +160,7 @@ function MainPage() {
     console.log("chat", chat, chat?.chatType)
 
     async function seeUserProfile(userId) {
-        setSeeGroup(-1);
+        // setSeeGroup(-1);
         setCteateGroup(false);
         setshowProfile(userId);
     }
@@ -168,18 +185,18 @@ function MainPage() {
 
     let mainPane = <NoChatHolder />;
 
-    if (seeGroup != -1) {
-        mainPane = <GroupDetailsPage groupId={seeGroup} close={closeGroupDetails} refetchChats={fetchChats} handleDelete={groupDeletion} />
+    if (false) {
+        mainPane = <GroupDetailsPage groupId={seeGroup} close={closeGroupDetails} refetchChats={fetchChats} handleDelete={groupDeletion} setUpdate={setUpdate} />
     } else if (createGroup) {
         mainPane = <NewGroupPage close={handleShowCreateGroup} refetchChats={fetchChats} />
     }
     else if (showProfile != -1) {
-        mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} setUpdate={setUpdate}/>
+        mainPane = <ProfilePage userId={showProfile} close={closeUserProfile} setUpdate={setUpdate} />
     } else if (chat) {
         if (chat.chatType == "GROUP") {
-            mainPane = <GroupChatPanel chat={chat} fetchChats={fetchChats} chatsList={chatsList} setChatsList={setChatsList} groupDeletion={groupDeletion} groupId={chat.groupId} messages={messages}/>
+            mainPane = <GroupChatPanel chat={chat} fetchChats={fetchChats} chatsList={chatsList} setChatsList={setChatsList} groupDeletion={groupDeletion} groupId={chat.groupId} messages={messages} setUpdate={setUpdate} />
         } else {
-            mainPane = <NormalChatPanel chat={chat} chatsList={chatsList} fetchChats={fetchChats} setChatsList={setChatsList}/>
+            mainPane = <NormalChatPanel chat={chat} chatsList={chatsList} fetchChats={fetchChats} setChatsList={setChatsList} />
         }
     }
 
@@ -187,7 +204,7 @@ function MainPage() {
         <>
             <div className="main-page">
                 {viewChats ? (
-                    <ContactsPane user={user} chatsList={sortedChatsList} selectUser={handleSelectUser} logout={handleLogout} createGroup={handleShowCreateGroup} seeUserProfile={seeUserProfile} update={update}/>
+                    <ContactsPane user={user} chatsList={sortedChatsList} selectUser={handleSelectUser} logout={handleLogout} createGroup={handleShowCreateGroup} seeUserProfile={seeUserProfile} update={update} />
                 ) : (
                     <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelectUser} createGroup={handleShowCreateGroup} />
                 )}

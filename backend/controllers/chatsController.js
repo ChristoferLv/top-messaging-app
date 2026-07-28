@@ -231,7 +231,7 @@ const sendFirstMessage = [
                 const receiver = receiverId;
 
                 if (result) {
-                    req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + newChat.id);
+                    req.socketIo.to(`user:${receiver}`).emit("new-message", "chat:" + newChat.id);
                 }
 
                 return newChatData;
@@ -333,7 +333,7 @@ const sendMessage = [
 
                 const receiver = chat.recipientId == userId ? chat.senderId : chat.recipientId;
                 if (result) {
-                    req.socketIo.to(`user:${receiver}`).emit("olha a mensagem", "chat:" + chat.id);
+                    req.socketIo.to(`user:${receiver}`).emit("new-message", "chat:" + chat.id);
                 }
                 if (midiaMessage) {
                     const { reducedFileRef, content } = fileRef;
@@ -382,11 +382,11 @@ async function getMessageOfChat(req, res) {
             orderBy: { created_at: 'asc' }
         });
 
-        if (messages.length == 0)
-            return res.status(404).send({
-                success: false,
-                message: "Chat not found"
-            });
+        // if (messages.length == 0)
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "Chat not found"
+        //     });
 
         res.status(200).send({ success: true, data: messages });
     } catch (e) {

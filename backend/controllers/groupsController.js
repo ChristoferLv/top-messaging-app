@@ -187,7 +187,7 @@ const sendGroupMessage = [
             });
 
             const treatedReceivers = receivers.map((receiver) => `user:${receiver.userId}`);
-            req.socketIo.to(treatedReceivers).emit("olha a mensagem", "chat:" + groupId)
+            req.socketIo.to(treatedReceivers).emit("new-message", "chat:" + groupId)
             return res.status(201).send({ success: true, data: sendMessageResult });
         } catch (e) {
             console.log(e);
@@ -256,11 +256,13 @@ async function getGroupDetails(req, res) {
 
         const details = await prisma.groupChats.findUnique({
             where: { id: groupId },
+            omit: { picture: true },
             include: {
                 creator: { select: { id: true, username: true } },
                 usersGroups: { select: { user: { select: { id: true, username: true } } } }
             },
         });
+
         res.status(200).send({ success: true, data: details });
     } catch (e) {
         console.log(e);

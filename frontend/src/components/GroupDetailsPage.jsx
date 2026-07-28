@@ -5,7 +5,7 @@ import UserPicture from "./UserPicture";
 import { AuthContext } from "../AuthContext";
 import ConfirmationDialog from "./ConfirmationDialog";
 
-function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
+function GroupDetailsPage({ groupId, close, refetchChats, handleDelete, setUpdate }) {
     const { user, isLoading } = useContext(AuthContext);
     const [groupData, setgroupData] = useState(null);
     const [myContacts, setMyContacts] = useState([]);
@@ -36,7 +36,7 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
         getContacts();
 
         return () => setMyContacts([]);
-    }, [groupData]);
+    }, []);
 
     useEffect(() => {
         async function getPicture() {
@@ -153,6 +153,7 @@ function GroupDetailsPage({ groupId, close, refetchChats, handleDelete }) {
         if (result.success) {
             setPicture(result.data.buffer?.data);
             setMime(result.data.mime);
+            setUpdate(c => c + 1);
             refetchChats();
         }
     }

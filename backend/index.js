@@ -55,6 +55,7 @@ app.use((req, res, next) => {
   // Overwrite the function to intercept the payload
   res.send = function (body) {
     console.log('--- Outgoing Response Data ---');
+    // console.log(body)
     console.log('------------------------------');
 
     // Call the original send function to complete the request
@@ -111,7 +112,7 @@ io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
     console.log('Message received:', msg);
     console.log("sokcet info", socket.id, socket.user);
-    io.to(`user:${socket.user.userId}`).emit("olha a mensagem", "user:" + socket.user.userId);
+    io.to(`user:${socket.user.userId}`).emit("new-message", "user:" + socket.user.userId);
     // Broadcast the message to all connected clients
     io.emit('chat message', msg);
   });
