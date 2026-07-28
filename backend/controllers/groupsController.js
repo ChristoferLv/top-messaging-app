@@ -13,6 +13,20 @@ const validateGroup = [
 
 ];
 
+const validateMessage = [
+    body("message")
+        .trim()
+        .custom((value, { req }) => {
+            if (req.file && req.file.size > 5000000) {
+                throw new Error("Maximum file size if 5MB.");
+            }
+            if (!req.file && value.length < 1)
+                throw new Error("Minimum message length is 1 character.");
+            return true;
+        })
+        .isLength({ max: 20000 }).withMessage("The maximum message length is 20000 characters.")
+];
+
 
 const createGroup = [
     validateGroup,
@@ -71,112 +85,116 @@ const createGroup = [
     }
 ];
 
-/**
- * @param {import('express').Request} req - The Express request object.
- * @param {import('express').Response} res - The Express response object.
- */
-async function sendGroupMessage(req, res) {
-    if (!req.user) {
-        return res.status(401).send({ success: false });
-    }
+const sendGroupMessage = [
+    validateMessage,
+    async (req, res) => {
+        try {
+            if (!req.user) {
+                return res.status(401).send({ success: false });
+            }
 
-    try {
-        const groupId = parseInt(req.params.groupId);
-        const userId = req.user.id;
-        const message = req.body.message;
-        const midiaMessage = req.file?.size > 0;
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ success: false, error: errors });
+            }
 
-        const isMember = await prisma.usersGroups.findUnique({
-            where: { userId_groupChatId: { userId: userId, groupChatId: groupId } }
-        })
+            const groupId = parseInt(req.params.groupId);
+            const userId = req.user.id;
+            const message = matchedData(req).message;
+            const midiaMessage = req.file?.size > 0;
 
-        if (!isMember) {
-            return res.status(403).send({ success: false, message: "You are not member of this group." });
-        }
+            const isMember = await prisma.usersGroups.findUnique({
+                where: { userId_groupChatId: { userId: userId, groupChatId: groupId } }
+            })
 
-        if (midiaMessage && req.file.size > 5000000) {
-            return res.status(400).send({ success: false, message: "Maximum midia size is 5MB." });
-        }
+            if (!isMember) {
+                return res.status(403).send({ success: false, message: "You are not member of this group." });
+            }
 
-        if (midiaMessage && !req.file.mimetype.startsWith("image/"))
-            return res.status(400).send({ success: false, message: "Invalid file type." });
+            if (midiaMessage && req.file.size > 5000000) {
+                return res.status(400).send({ success: false, message: "Maximum midia size is 5MB." });
+            }
+
+            if (midiaMessage && !req.file.mimetype.startsWith("image/"))
+                return res.status(400).send({ success: false, message: "Invalid file type." });
 
 
-        let fileRef = null;
-        let result = null;
-        const sendMessageResult = await prisma.$transaction(async (tx) => {
-            const group = await tx.groupChats.findUnique({
-                where: { id: groupId }
-            });
+            let fileRef = null;
+            let result = null;
+            const sendMessageResult = await prisma.$transaction(async (tx) => {
+                const group = await tx.groupChats.findUnique({
+                    where: { id: groupId }
+                });
 
-            if (!group)
-                return res.status(400).send({ success: false, message: "Group not found" });
+                if (!group)
+                    return res.status(400).send({ success: false, message: "Group not found" });
 
-            const updateGroupResult = await tx.groupChats.update(
-                {
-                    where: { id: groupId },
-                    data: { updated_at: new Date() }
-                },
+                const updateGroupResult = await tx.groupChats.update(
+                    {
+                        where: { id: groupId },
+                        data: { updated_at: new Date() }
+                    },
+                );
+
+
+                if (midiaMessage) {
+                    result = await tx.groupMessages.create({
+                        data: {
+                            content: "Midia",
+                            groupChatId: groupId,
+                            senderId: userId,
+                            type: 'MIDIA',
+                        }
+                    });
+                } else {
+                    result = await tx.groupMessages.create({
+                        data: {
+                            content: message,
+                            groupChatId: groupId,
+                            senderId: userId,
+                            type: 'TEXT'
+                        }
+                    });
+                }
+
+                if (midiaMessage) {
+                    fileRef = await tx.groupMidias.create(
+                        {
+                            data: {
+                                content: req.file.buffer,
+                                mime: req.file.mimetype,
+                                ownerId: userId,
+                                groupMessageId: result.id,
+                                groupId: groupId,
+                            }
+                        }
+                    )
+                }
+
+                if (midiaMessage) {
+                    const { reducedFileRef, content } = fileRef;
+                    return { ...result, midia: reducedFileRef };
+                }
+                return result;
+            }
             );
 
+            const receivers = await prisma.usersGroups.findMany({
+                where: {
+                    groupChatId: groupId
+                },
+                select: { userId: true }
+            });
 
-            if (midiaMessage) {
-                result = await tx.groupMessages.create({
-                    data: {
-                        content: "Midia",
-                        groupChatId: groupId,
-                        senderId: userId,
-                        type: 'MIDIA',
-                    }
-                });
-            } else {
-                result = await tx.groupMessages.create({
-                    data: {
-                        content: message,
-                        groupChatId: groupId,
-                        senderId: userId,
-                        type: 'TEXT'
-                    }
-                });
-            }
-
-            if (midiaMessage) {
-                fileRef = await tx.groupMidias.create(
-                    {
-                        data: {
-                            content: req.file.buffer,
-                            mime: req.file.mimetype,
-                            ownerId: userId,
-                            groupMessageId: result.id,
-                            groupId: groupId,
-                        }
-                    }
-                )
-            }
-
-            if (midiaMessage) {
-                const { reducedFileRef, content } = fileRef;
-                return { ...result, midia: reducedFileRef };
-            }
-            return result;
+            const treatedReceivers = receivers.map((receiver) => `user:${receiver.userId}`);
+            req.socketIo.to(treatedReceivers).emit("olha a mensagem", "chat:" + groupId)
+            return res.status(201).send({ success: true, data: sendMessageResult });
+        } catch (e) {
+            console.log(e);
+            res.status(500).send({ success: false });
         }
-        );
-
-        const receivers = await prisma.usersGroups.findMany({
-            where: {
-                groupChatId: groupId
-            },
-            select: { userId: true }
-        });
-
-        const treatedReceivers = receivers.map((receiver) => `user:${receiver.userId}`);
-        req.socketIo.to(treatedReceivers).emit("olha a mensagem", "chat:" + groupId)
-        return res.status(201).send({ success: true, data: sendMessageResult });
-    } catch (e) {
-        console.log(e);
-        res.status(500).send({ success: false });
     }
-}
+];
 
 /**
  * @param {import('express').Request} req - The Express request object.
@@ -556,7 +574,7 @@ async function changeGroupPicture(req, res) {
         let newbuffer = null;
         if (result.picture)
             newbuffer = Buffer.from(result.picture, result.picture.byteOffset, result.picture.byteLength)
-        return res.status(201).send({ success: true, data: {mime:mime, buffer:newbuffer} });
+        return res.status(201).send({ success: true, data: { mime: mime, buffer: newbuffer } });
     } catch (e) {
         console.log(e);
         return res.status(500).send({ success: false });

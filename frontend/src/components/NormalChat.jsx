@@ -31,6 +31,20 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
         }
     }, [chat]);
 
+    function keydownArea(event) {
+        if (event.key === 'Enter') {
+            if (!event.shiftKey) {
+                event.preventDefault(); 
+                const form = event.target.closest('form');
+                if (form) {
+                    form.requestSubmit();
+                } else {
+                    console.log("Submit action triggered: ", event.target.value);
+                }
+            }
+        }
+    }
+
     useEffect(() => {
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
@@ -150,29 +164,29 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats }) {
                                     <MidiaMessage midiaId={message.id} origin={ChatType.NORMAL} />
                                 </div>
                             return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                <p>{message.content}</p>
+                                <textarea readOnly value={message.content} />
                                 <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
                             </div>
                         })}
                     </div>
-                </div>
-                <div className="chat-controls">
-                    <form onSubmit={handleSendMessage} action="">
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            name="midia"
-                            style={{ display: "none" }}
-                            onChange={handleUploadImage}
-                        />
-                        <input type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
-                        <button className="send-picture"
-                            type="button"
-                            onClick={handleClickAttach}
-                        ><img src="../public/attach-icon.png" alt="" />
-                        </button>
-                    </form>
+                    <div className="chat-controls">
+                        <form onSubmit={handleSendMessage} action="">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                name="midia"
+                                style={{ display: "none" }}
+                                onChange={handleUploadImage}
+                            />
+                            <textarea onKeyDown={keydownArea} type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
+                            <button className="send-picture"
+                                type="button"
+                                onClick={handleClickAttach}
+                            ><img src="../public/attach-icon.png" alt="" />
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
