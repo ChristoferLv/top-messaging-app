@@ -5,7 +5,8 @@ body {
     max-height: 100dvh;
     justify-content: center;
 
-    --primary-color: #161717;
+    --main-background-color: #1d1f1f;
+    --secondary-background-color: #161717;
 }
 
 #root,
@@ -22,10 +23,12 @@ app-root {
     align-items: center;
     flex-grow: 1;
     overflow: auto;
+    background-color: #212222
 }
 
 .auth-container>form {
-    background-color: #fff;
+    color: white;
+    background-color: #38383a;
     border-radius: 15px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     padding: 10px 20px;
@@ -41,7 +44,6 @@ label {
     margin-top: 10px;
     margin-bottom: 5px;
     text-align: left;
-    color: #383838;
     font-weight: bold;
 }
 
@@ -63,13 +65,17 @@ label {
     border: none;
     color: white;
     cursor: pointer;
-    background-color: #4CAF50;
+    background-color: #3636d0;
     width: 100%;
     font-size: 16px;
 }
 
 .auth-form input {
     margin-bottom: 2px;
+}
+
+.link-plain{
+    color: white;
 }
 
 .wrap {
@@ -157,7 +163,7 @@ label {
     display: flex;
     flex-direction: column;
     position: relative;
-    background-color: var(--primary-color);
+    background-color: var(--main-background-color);
     border-right: #3d3d3d solid 1px;
     height: 100%;
     color: white;
@@ -354,7 +360,7 @@ label {
     display: flex;
     align-items: center;
     gap: 0 10px;
-    background-color: #161717;
+    background-color: var(--secondary-background-color);
     color: white;
     padding: 10px;
 
@@ -459,7 +465,7 @@ label {
 }
 
 .new-group-page {
-    background-color: #161717;
+    background-color: var(--secondary-background-color);
     display: flex;
     flex-direction: column;
     padding: 15px;
@@ -653,11 +659,11 @@ label {
         outline: none;
         resize: none;
         field-sizing: content;
-         font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-  color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        color: inherit;
     }
 }
 
@@ -681,7 +687,7 @@ label {
 .msg.rcvd {
     border-radius: var(--rad-sm) var(--rad) var(--rad) var(--rad-sm);
     background: #f1f1f1;
-    color: #1d1f1f;
+    color: var(--main-background-color);
     margin-right: auto;
 }
 
@@ -798,7 +804,7 @@ dialog {
 
 
 .profile-page {
-    background-color: #161717;
+    background-color: var(--secondary-background-color);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -925,7 +931,7 @@ dialog {
 
 .holder {
     display: flex;
-    background-color: #1d1f1f;
+    background-color: var(--main-background-color);
     justify-content: center;
     align-items: center;
     flex-grow: 1;
@@ -948,7 +954,7 @@ dialog {
     width: 30%;
     padding-top: 4%;
     border-radius: 7%;
-    background-color: #161717;
+    background-color: var(--secondary-background-color);
 }
 
 .hold-img {
