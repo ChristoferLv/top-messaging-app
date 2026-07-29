@@ -5,10 +5,12 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import LoginPage from './LoginPage.jsx';
 import { AuthProvider } from './AuthProvider.jsx'
 import MainPage from './MainPage.jsx';
+import RegisterPage from './RegisterPage.jsx';
 
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
+  { path: "/register", element: <RegisterPage /> },
   {
     path: "/",
     element: <App />,

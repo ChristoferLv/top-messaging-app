@@ -74,7 +74,7 @@ label {
     margin-bottom: 2px;
 }
 
-.link-plain{
+.link-plain {
     color: white;
 }
 
@@ -858,7 +858,7 @@ dialog {
     padding: 20px;
 }
 
-.pic-container{
+.pic-container {
     position: relative;
 }
 
@@ -906,7 +906,7 @@ dialog {
 }
 
 
-.status-dot{
+.status-dot {
     position: absolute;
     width: 10px;
     height: 10px;
@@ -1014,6 +1014,10 @@ dialog {
     color: red;
     margin-top: 5px;
     margin-bottom: 0px;
+}
+
+.align-left {
+    text-align: left;
 }
 
 .overlay {

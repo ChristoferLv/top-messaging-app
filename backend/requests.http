@@ -1,4 +1,4 @@
-@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ1c2VyMiIsImlhdCI6MTc4NTE5MjM2OCwiZXhwIjoxNzg1Mjc4NzY4fQ.PQ4YxmOyqCPtbTfH0dRFXB4AyP3alhMK2JGOQ2v14g4
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc4NTM0ODQzMiwiZXhwIjoxNzg1NDM0ODMyfQ.SN08c-2vk86qshiNcuuy4WaKcetgwmZjdCE710FnHNg
 
 GET http://localhost:3000/auth/check
 content-type: application/json
@@ -21,7 +21,7 @@ POST http://localhost:3000/auth/login
 content-type: application/json
 
 {
-    "username":"user2",
+    "username":"user1",
     "password":"pass"
 }
 
@@ -72,7 +72,7 @@ Authorization: {{token}}
 
 ###
 
-GET http://localhost:3000/chats/chatWith/1
+GET http://localhost:3000/chats/chatWith/3
 Authorization: {{token}}
 
 ###
@@ -87,7 +87,7 @@ content-type: application/json
 Authorization: {{token}}
 
 {
-    "message":"How r u"
+    "message":"Frend"
 }
 
 ###
@@ -125,7 +125,7 @@ Authorization: {{token}}
 
 ###
 
-POST http://localhost:3000/groups/16/messages
+POST http://localhost:3000/groups/23/messages
 content-type: application/json
 Authorization: {{token}}
 

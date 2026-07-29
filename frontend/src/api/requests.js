@@ -1,4 +1,15 @@
-const BASE_URL = "http://localhost:3000"
+async function register(data) {
+    try {
+        const request = await fetch(`http://localhost:3000/auth/signup`, {
+            method: 'Post',
+            body: data,
+        });
+        return request;
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
 
 async function logOut() {
     localStorage.removeItem("user");
@@ -610,6 +621,7 @@ async function fetchMessageMidia(midiaId, origin) {
 
 
 export {
+    register,
     login,
     logOut,
     getMe,

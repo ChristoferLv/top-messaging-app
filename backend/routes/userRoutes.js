@@ -1,13 +1,11 @@
 import { Router } from "express";
 import { getUserById, findUserByUsername, getAllUsers, getPicture, uploadPicture, updateUserProfile } from "../controllers/usersController.js";
 import { passport } from "../authUtils.js";
-
 import multer from "multer";
 
+
 const storage = multer.memoryStorage();
-
 const upload = multer({ storage: storage });
-
 
 const userRoutes = Router();
 

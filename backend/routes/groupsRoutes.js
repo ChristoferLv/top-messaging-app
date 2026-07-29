@@ -1,11 +1,10 @@
 import { Router } from "express";
 import { addMemberToGroup, changeGroupPicture, createGroup, deleteGroup, editGroup, getGroupDetails, getGroupPicture, getMessageOfGroup, leaveGroup, removeMemberFromGroup, sendGroupMessage } from "../controllers/groupsController.js";
 import { passport } from "../authUtils.js";
-
 import multer from "multer";
 
-const storage = multer.memoryStorage();
 
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 

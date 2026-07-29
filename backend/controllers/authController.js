@@ -21,6 +21,12 @@ const validateNewUser = [
     body('confirmPassword').custom((value, { req }) => {
         return value === req.body.password;
     }).withMessage("Password fields must match"),
+    body().custom((value, { req }) => {
+        if (req.file && req.file.size > 5000000) {
+            throw new Error("Maximum file size if 5MB.");
+        }
+        return true;
+    })
 ];
 
 async function checkToken(req, res) {
@@ -148,10 +154,16 @@ const register = [
                 return res.status(400).json({ success: false, error: errors });
             }
 
+            const hasPicture = req.file?.size > 0;
+
             const { username, password } = matchedData(req);
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            const result = await prisma.users.create({ data: { password: hashedPassword, username: username } });
+            let userData = { username: username, password: hashedPassword };
+            if (hasPicture)
+                userData = { ...userData, picture: req.file.buffer, mime: req.file.mimetype };
+
+            const result = await prisma.users.create({ data: userData });
 
             res.status(201).json({
                 data: result,

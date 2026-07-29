@@ -1,16 +1,15 @@
 import { Router } from "express"
 import { checkChatExistsWith, getMessageMidia, getMessageOfChat, listAllChats, listMyChats, sendFirstMessage, sendMessage } from "../controllers/chatsController.js";
 import { passport } from "../authUtils.js";
+import multer from "multer";
+
 
 
 const chatRoutes = Router();
 
-
-import multer from "multer";
-
 const storage = multer.memoryStorage();
-
 const upload = multer({ storage: storage });
+
 
 chatRoutes.get("/", passport.authenticate('jwt', { session: false }), listAllChats)
 chatRoutes.get("/mine", passport.authenticate('jwt', { session: false }), listMyChats);

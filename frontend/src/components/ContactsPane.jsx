@@ -20,10 +20,6 @@ function ContactsPane({ user, chatsList, logout, update, selectUser, createGroup
         createGroup();
     }
 
-    // useEffect(() => {
-
-    // }, update)
-
     return (
         sidePane ? <MyContacts closeContactsList={handleToggleSidePane} selectUser={handleSelecUser} createGroup={handleCreateGroup} />
             :

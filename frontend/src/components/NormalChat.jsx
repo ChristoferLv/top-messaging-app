@@ -74,7 +74,7 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats, setChat })
                 socketIO.off('new-message', newMessageEvent);
             }
         };
-    }, [chat.user.id]);
+    }, [chat.user.id, chat.chat?.id]);
 
     async function handleSendMessage(e) {
         e.preventDefault();
