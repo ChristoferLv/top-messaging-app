@@ -33,7 +33,7 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats, setChat })
     function keydownArea(event) {
         if (event.key === 'Enter') {
             if (!event.shiftKey) {
-                event.preventDefault(); 
+                event.preventDefault();
                 const form = event.target.closest('form');
                 if (form) {
                     form.requestSubmit();
@@ -146,12 +146,11 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats, setChat })
     }
 
     return (
-
         seeProfile ? <ProfilePage userId={chat.user.id} close={closeProfile} />
             :
-            <div className="chat-pane">
+            (<div className="chat-pane">
                 <div className="chat-header" onClick={() => seeUserProfile(chat.user.id)}>
-                    <UserPicture id={chat.user.id} type={chat.chatType} isOnline={chat.user.isOnline}/>
+                    <UserPicture id={chat.user.id} type={chat.chatType} isOnline={chat.user.isOnline} />
                     <p>{chat.user.username}</p>
                 </div>
                 <div className="chat-body">
@@ -187,7 +186,7 @@ function NormalChatPanel({ chat, chatsList, setChatsList, fetchChats, setChat })
                     </div>
                 </div>
             </div>
-
+            )
     );
 }
 

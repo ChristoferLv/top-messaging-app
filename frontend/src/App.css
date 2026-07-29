@@ -7,6 +7,10 @@ body {
 
     --main-background-color: #1d1f1f;
     --secondary-background-color: #161717;
+
+    --sb-track-color: #000000;
+    --sb-thumb-color: #b7b7b7;
+    --sb-size: 4px;
 }
 
 #root,
@@ -179,10 +183,6 @@ label {
     /* height: calc(100% - 300px); */
     overflow-y: scroll;
     border-bottom: #555 solid 2px;
-
-    --sb-track-color: #000000;
-    --sb-thumb-color: #b7b7b7;
-    --sb-size: 4px;
 }
 
 
@@ -288,6 +288,12 @@ label {
         white-space: nowrap;
     }
 
+}
+
+.chat-title{
+    font-weight: bold;
+    font-family: sans-serif;
+    font-size: 14px;
 }
 
 .new-contact {
@@ -397,6 +403,28 @@ label {
     padding: 20px;
     /* margin-bottom: 80px; */
 }
+
+.messages-list::-webkit-scrollbar {
+    width: var(--sb-size)
+}
+
+.messages-list::-webkit-scrollbar-track {
+    background: var(--sb-track-color);
+    border-radius: 3px;
+}
+
+.messages-list::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb-color);
+    border-radius: 3px;
+
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .messages-list {
+        scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+    }
+}
+
 
 .messages-list>*:first-child {
     margin-top: auto;
@@ -673,9 +701,17 @@ label {
 }
 
 .message-time {
+    margin-bottom: 0px;
     margin-top: 2px;
     font-size: 10px;
     align-self: flex-end;
+}
+
+.message-sender {
+    margin-bottom: 0px;
+    margin-top: 0px;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .rcvd .message-time {
@@ -711,6 +747,7 @@ label {
     width: 10vw;
     height: 4vw;
     cursor: pointer;
+    margin-bottom: 5px;
 
     img {
         width: 100%;
@@ -776,38 +813,6 @@ dialog {
         display: block;
     }
 }
-
-
-/* time */
-
-/* .msg::before {
-    content: attr(data-time);
-    font-size: 0.8rem;
-    position: absolute;
-    bottom: 100%;
-    color: #888;
-    white-space: nowrap;
-    display: none;
-} */
-
-/* .msg.sent::before {
-    right: 15px;
-}
-
-.msg.rcvd::before {
-    left: 15px;
-} */
-
-
-/* Show time only for first message in group */
-
-/* .msg:first-child::before,
-.msg.sent+.msg.rcvd::before,
-.msg.rcvd+.msg.sent::before {
-    display: block;
-} */
-
-
 
 .profile-page {
     background-color: var(--secondary-background-color);

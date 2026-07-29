@@ -99,7 +99,7 @@ function MyContacts({ closeContactsList, selectUser, createGroup }) {
                         return <div key={contact.contact.id} className="user-item" onClick={(e) => selectUser(contact.contact)}>
                             <UserPicture id={contact.contact.id} type={ChatType.NORMAL} />
                             <div className="user-item-data">
-                                <p>{contact.contact.id} - {contact.contact.username}</p>
+                                <p>{contact.contact.username}</p>
                             </div>
                         </div>
                     }) : <p>No contacts</p>}

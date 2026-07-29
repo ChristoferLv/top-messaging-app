@@ -7,7 +7,6 @@ function App() {
   const { user, isLoading } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  console.log("app", user, isLoading)
   if (isLoading) return <><p>Loading...</p></>;
   if (!user && !isLoading) return <Navigate to="/login" replace />
 

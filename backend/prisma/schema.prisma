@@ -132,20 +132,3 @@ model GroupMidias {
   groupId        Int
   group          GroupChats    @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
-
-// model Order {
-//   id               Int     @id @default(autoincrement())
-//   tradeId          Int
-//   trade            Trade   @relation(name: "Order_Trade", fields: [tradeId], references: [id])
-//   entryOrderTrades Trade[] @relation("Trade_EntryOrder")
-//   exitOrderTrades  Trade[] @relation("Trade_ExitOrder")
-// }
-
-// model Trade {
-//   id           Int     @id @default(autoincrement())
-//   entryOrderId Int
-//   entryOrder   Order   @relation(name: "Trade_EntryOrder", fields: [entryOrderId], references: [id])
-//   exitOrderId  Int
-//   exitOrder    Order   @relation(name: "Trade_ExitOrder", fields: [exitOrderId], references: [id])
-//   order        Order[] @relation("Order_Trade")
-// }

@@ -12,6 +12,18 @@ async function register(data) {
 }
 
 async function logOut() {
+    const token = localStorage.getItem("token");
+    try {
+        const rawResponse = await fetch('http://localhost:3000/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
+
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     window.location.pathname = "/login";
@@ -69,7 +81,6 @@ async function fetchAllUsers() {
         });
         if (request.status == 200) {
             const users = await request.json();
-            console.log(users)
             return users;
         }
     } catch (e) {
@@ -124,7 +135,6 @@ async function sendFirstMessage(chatId, data) {
     const formData = new FormData();
     formData.append("midia", data.midia);
     formData.append("message", data.message)
-    console.log("first message")
     try {
         const token = localStorage.getItem("token");
         const request = await fetch(`http://localhost:3000/chats/${chatId}/messages/first`, {
@@ -170,7 +180,6 @@ async function sendMessage(chatId, data) {
 }
 
 async function fetchMessagesOfChat(chatId) {
-    console.log("fetching messages of", chatId)
     try {
         const token = localStorage.getItem("token");
         const request = await fetch(`http://localhost:3000/chats/${chatId}/messages`, {
@@ -261,7 +270,6 @@ async function createGroup(groupData) {
 }
 
 async function fetchMessagesOfGroup(groupId) {
-    console.log("fetching messages of", groupId)
     try {
         const token = localStorage.getItem("token");
         const request = await fetch(`http://localhost:3000/groups/${groupId}/messages`, {
@@ -368,7 +376,6 @@ async function leaveGroup(groupId) {
 }
 
 async function deleteGroup(groupId) {
-    console.log("delete callded")
     try {
         const token = localStorage.getItem("token");
         const request = await fetch(`http://localhost:3000/groups/${groupId}`, {
@@ -461,7 +468,6 @@ async function findUserWithUsername(username) {
 }
 
 async function findUserById(userId) {
-    console.log("Search for", userId)
     try {
         const token = localStorage.getItem("token");
         const request = await fetch("http://localhost:3000/users/" + userId, {
@@ -606,7 +612,6 @@ async function fetchMessageMidia(midiaId, origin) {
         });
         if (request.ok) {
             const midia = await request.json();
-            console.log(midia)
             return midia;
         }
     } catch (e) {

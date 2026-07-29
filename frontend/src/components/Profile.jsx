@@ -118,13 +118,13 @@ function ProfilePage({ userId, close, setUpdate }) {
                 <p className="profile-username">{profile.username}</p>
                 {isEditing ? (
                     <>
-                        <input className="profile-note-input" type="text" name="note" value={editedProfile.note} onChange={(e) => handleChange(e)} />
+                        <input placeholder="Note" className="profile-note-input" type="text" name="note" value={editedProfile.note} onChange={(e) => handleChange(e)} />
                         <p ref={errorMessage} className="hidden error">Maximum note length is 120 characters</p>
                     </>
                 )
                     : (
                         <>
-                            <p className="profile-note">Note: {profile.note}</p>
+                            {profile.note && <p className="profile-note">Note: {profile.note}</p>}
                         </>
                     )
 

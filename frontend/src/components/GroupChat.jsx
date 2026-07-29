@@ -141,56 +141,53 @@ function GroupChatPanel({ chat, chatsList, setChatsList, fetchChats, groupDeleti
         }
     }
 
-
     return (
-
-        seeGroupDetails ?
-            (
-                <GroupDetailsPage groupId={chat.groupId} close={closeGroupDetails}
-                    refetchChats={fetchChats}
-                    handleDelete={groupDeletion}
-                    setUpdate={setUpdate} />
-            )
+        seeGroupDetails ? <GroupDetailsPage groupId={chat.groupId} close={closeGroupDetails}
+            refetchChats={fetchChats}
+            handleDelete={groupDeletion}
+            setUpdate={setUpdate} />
             :
-            (
-                <div className="chat-pane">
-                    <div className="chat-header" onClick={() => { setSeeGroupDetails(true) }}>
-                        <UserPicture id={chat.groupId} type={ChatType.GROUP} />
-                        <p>{chat.username}</p>
-                    </div>
-                    <div className="chat-body">
-                        <div className="messages-list" ref={containerRef}>
-                            {messages && messages.map((message) => {
-                                if (message.type == "MIDIA")
-                                    return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                        <MidiaMessage midiaId={message.id} origin={ChatType.GROUP} />
-                                    </div>
+            (<div className="chat-pane">
+                <div className="chat-header" onClick={() => { setSeeGroupDetails(true) }}>
+                    <UserPicture id={chat.groupId} type={ChatType.GROUP} />
+                    <p>{chat.username}</p>
+                </div>
+                <div className="chat-body">
+                    <div className="messages-list" ref={containerRef}>
+                        {messages && messages.map((message) => {
+                            if (message.type == "MIDIA")
                                 return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
-                                    <textarea readOnly value={message.content} />
+                                    {message.sender.id != user.id && <p className="message-sender">{message.sender.username}</p>}
+                                    <MidiaMessage midiaId={message.id} origin={ChatType.GROUP} />
                                     <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
                                 </div>
-                            })}
-                        </div>
-                        <div className="chat-controls">
-                            <form onSubmit={handleSendMessage} action="">
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    name="midia"
-                                    style={{ display: "none" }}
-                                    onChange={handleUploadImage}
-                                />
-                                <textarea onKeyDown={keydownArea} type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
-                                <button className="send-picture"
-                                    type="button"
-                                    onClick={handleClickAttach}
-                                ><img src="../public/attach-icon.png" alt="" />
-                                </button>
-                            </form>
-                        </div>
+                            return <div data-time={message.created_at} key={message.id} className={`msg ${message.senderId == user.id ? "sent" : "rcvd"}`}>
+                                {message.sender.id != user.id && <p className="message-sender">{message.sender.username}</p>}
+                                <textarea readOnly value={message.content} />
+                                <p className="message-time">{new Date(message.created_at).toLocaleString()}</p>
+                            </div>
+                        })}
+                    </div>
+                    <div className="chat-controls">
+                        <form onSubmit={handleSendMessage} action="">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                name="midia"
+                                style={{ display: "none" }}
+                                onChange={handleUploadImage}
+                            />
+                            <textarea onKeyDown={keydownArea} type="text" name="message" value={typingMessage} placeholder="Type your message" onChange={(e) => handleTypingMessage(e)} />
+                            <button className="send-picture"
+                                type="button"
+                                onClick={handleClickAttach}
+                            ><img src="../public/attach-icon.png" alt="" />
+                            </button>
+                        </form>
                     </div>
                 </div>
+            </div>
             )
     );
 }

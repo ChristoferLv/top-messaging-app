@@ -14,23 +14,16 @@ import GroupChatPanel from "./components/GroupChat";
 import NormalChatPanel from "./components/NormalChat";
 import ContactsPane from "./components/ContactsPane";
 
-// let socket = null;
-
 function MainPage() {
     const [socket, setSocket] = useState(null);
-    // const [usersList, setUsersList] = useState([]);
     const [chatsList, setChatsList] = useState([]);
-    // const [typingMessage, setTypingMessage] = useState("");
     const { user, isLoading } = useContext(AuthContext);
-    // const containerRef = useRef(null);
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
-    // const [seeGroup, setSeeGroup] = useState(-1);
     const [update, setUpdate] = useState(0);
 
     const sortedChatsList = chatsList.toSorted((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
-    // const [viewChats, setViewChats] = useState(true);
     const [showProfile, setshowProfile] = useState(-1);
     const [createGroup, setCteateGroup] = useState(false);
 
@@ -128,11 +121,8 @@ function MainPage() {
     }, []);
 
     async function handleSelectUser(newChat) {
-        console.log("selected user")
         setMessages(null);
-        // setSeeGroup(-1);
         setshowProfile(-1);
-        // setViewChats(true);
         setCteateGroup(false);
         if (newChat.chatType == "GROUP") {
             setMessages(messages);
@@ -140,13 +130,8 @@ function MainPage() {
             return;
         }
         const chatExistsData = await checkChatWith(newChat.id);
-        console.log(chatExistsData)
         setChat(chatExistsData.data);
     }
-
-    // function handleToggleSidePane() {
-    //     // setViewChats(c => !c);
-    // }
 
     function handleShowCreateGroup() {
         setCteateGroup(c => !c);
@@ -156,12 +141,7 @@ function MainPage() {
         logOut();
     }
 
-    console.log("chats list", chatsList)
-    console.log("sorted chats list", sortedChatsList)
-    console.log("chat", chat, chat?.chatType)
-
     async function seeUserProfile(userId) {
-        // setSeeGroup(-1);
         setCteateGroup(false);
         setshowProfile(userId);
     }
@@ -169,10 +149,6 @@ function MainPage() {
     async function closeUserProfile(userId) {
         setshowProfile(-1);
     }
-
-    // async function seeGroupDetails(groupId) {
-    //     setSeeGroup(groupId);
-    // }
 
     async function closeGroupDetails() {
         setSeeGroup(-1);
