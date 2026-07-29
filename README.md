@@ -128,6 +128,10 @@ npm run dev
 - Vite
 - React Router
 
+## Visualization
+
+<img width="1920" height="919" alt="messaging-app_screenshot" src="https://github.com/user-attachments/assets/9de943e0-268b-4264-bb08-fea5a7f0cb02" />
+
 ---
 
 >**Note on file storage:** storing uploaded files directly in the database isn't the best long-term choice for a production app, but it was a deliberate trade-off here. It keeps the project self-contained and easy for anyone to clone, run, and test without setting up external file storage.
