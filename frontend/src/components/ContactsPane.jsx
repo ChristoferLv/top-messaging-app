@@ -47,7 +47,7 @@ function ContactsPane({ user, chatsList, logout, update, selectUser, createGroup
                                 <div className="user-item-data">
                                     <p className="chat-title">{chatItem.username}</p>
                                     {chatItem.lastMessage != null ?
-                                        <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.username}: {chatItem.lastMessage.content}</p>
+                                        <p>{chatItem.lastMessage.senderId == user.id ? "You" : chatItem.lastMessage.sender.username}: {chatItem.lastMessage.content}</p>
                                         : <p>Group Created</p>
                                     }
                                     <p>{new Date(chatItem.updated_at).toLocaleString()}</p>

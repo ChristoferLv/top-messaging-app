@@ -115,6 +115,7 @@ async function listMyChats(req, res) {
                 {
                     where: { groupChatId: group.id },
                     orderBy: { created_at: 'desc' },
+                    include: { sender: { select: { username: true } } }
                 }
             )
         });
