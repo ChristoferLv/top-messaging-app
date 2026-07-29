@@ -130,7 +130,7 @@ npm run dev
 
 ## Visualization
 
-<img width="1920" height="919" alt="messaging-app_screenshot" src="https://github.com/user-attachments/assets/9de943e0-268b-4264-bb08-fea5a7f0cb02" />
+<img width="1920" height="919" alt="messaging-app_screenshot" src="https://github.com/user-attachments/assets/34dc102d-f92c-472b-8fe9-106d7ec4f894" />
 
 ---
 
