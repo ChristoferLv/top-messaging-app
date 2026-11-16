@@ -1,6 +1,6 @@
 # Messaging App
 
-A WhatsApp-inspired messaging app built as penultimate project of [The Odin Project Node.js](https://www.theodinproject.com/lessons/nodejs-messaging-app) course. It combines authentication, real-time one-to-one and group chats, and media messages using Express, Prisma, and Socket.IO.
+A WhatsApp-inspired messaging app built as penultimate project of [The Odin Project Node.js](https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs) course. It combines authentication, real-time one-to-one and group chats, and media messages using Express, Prisma, and Socket.IO.
 
 ## Project Objective
 
